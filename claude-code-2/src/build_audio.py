@@ -186,7 +186,7 @@ def main():
     k = int(0.22 * SR)
     env = np.convolve(np.abs(voice), np.ones(k, dtype=np.float32) / k, mode="same")
     env = np.clip(env / 0.05, 0, 1)
-    out = voice + music * (0.20 * (1.0 - 0.68 * env))
+    out = voice + music * (0.115 * (1.0 - 0.72 * env))
     fi, fo = int(0.4 * SR), int(1.6 * SR)
     out[:fi] *= np.linspace(0, 1, fi)
     out[-fo:] *= np.linspace(1, 0, fo)
