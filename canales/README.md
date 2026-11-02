@@ -19,6 +19,9 @@ Manual de marca completo: **`MARCAS.md`**.
 
 Todos: 1920×1080 · 30 fps · H.264 + AAC 48 kHz · −14 LUFS.
 
+Auditoría de empaquetado (lo único medible sin publicar): **`AUDITORIA.md`**,
+`out/auditoria.png` y `out/auditoria.json`.
+
 ## Qué es cada marca, en una línea
 
 - **MERIDIANO** · *El mundo, medido* — geopolítica en mapas. Cálido, editorial, Instrument
@@ -57,6 +60,8 @@ recalculan solos.
 python -m venv .venv && .venv/bin/pip install -r requirements.txt
 python src/build.py                    # los cuatro canales
 python src/build.py umbral cenit       # solo dos
+python src/audit.py                    # tabla de empaquetado de las 4 piezas
+python src/sheets.py                   # hojas de contactos
 ```
 
 Cada vídeo tarda unos 3–4 minutos (900 fotogramas a 1080p con supersampling 2×).
@@ -68,6 +73,8 @@ src/brandlib.py   motor de dibujo + las 4 marcas como datos (paleta, fuentes, ea
 src/marks.py      los 4 logotipos, dibujados con primitivas (nada de SVG ni imágenes)
 src/shots.py      20 planos (5 por canal) que solo usan tokens de la marca
 src/build.py      voz + música -> mp4, con detección de silencios para los cortes
+src/audit.py      auditoría medible: legibilidad, contraste, movimiento, ritmo -> out/auditoria.png
+src/sheets.py     hojas de contactos de los fotogramas reales de cada MP4
 audio/            las 4 locuciones (voz en off en español)
 assets/fonts/     Instrument Serif, Space Grotesk, Manrope, IBM Plex Mono, Source Serif 4,
                   Inter, JetBrains Mono — todas SIL OFL 1.1
