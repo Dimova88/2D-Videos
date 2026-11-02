@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="./gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: "Serif";
+        src: url("./SourceSerif4-700.ttf") format("truetype");
+      }
+      @font-face {
+        font-family: "Inter";
+        src: url("./Inter-600.ttf") format("truetype");
+      }
+      @font-face {
+        font-family: "Mono";
+        src: url("./JetBrainsMono-600.ttf") format("truetype");
+      }
+      :root {
+        --ground: #100e0d;
+        --cream: #f4eee5;
+        --muted: #ac9f92;
+        --faint: #7a6f63;
+        --coral: #d97757;
+        --sage: #7fa98b;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: 1920px; height: 1080px; overflow: hidden;
+        background: radial-gradient(120% 90% at 50% 8%, #1c1714 0%, #100e0d 55%, #0a0807 100%);
+        font-family: "Inter", sans-serif;
+      }
+      #root { width: 100%; height: 100%; position: relative; }
+      #grid {
+        position: absolute; inset: 0;
+        background-image:
+          linear-gradient(to right, rgba(255,255,255,0.022) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(255,255,255,0.018) 1px, transparent 1px);
+        background-size: 120px 120px;
+      }
+      #map { position: absolute; inset: 0; width: 1920px; height: 1080px; }
+      .kicker {
+        position: absolute; left: 118px; top: 96px;
+        font-size: 24px; font-weight: 700; letter-spacing: 0.34em;
+        color: var(--muted); text-transform: uppercase;
+      }
+      .kicker::before {
+        content: ""; position: absolute; left: -22px; top: 4px;
+        width: 7px; height: 30px; background: var(--coral); border-radius: 1px;
+      }
+      h1 {
+        position: absolute; left: 92px; top: 138px;
+        font-family: "Source Serif 4", serif; font-weight: 700; font-size: 92px;
+        letter-spacing: -0.022em; color: var(--cream);
+        font-kerning: normal; font-feature-settings: "kern" 1, "liga" 1, "dlig" 1;
+      }
+      .sub {
+        position: absolute; left: 96px; top: 248px;
+        font-size: 24px; color: var(--muted); letter-spacing: 0.01em;
+      }
+      .counter { position: absolute; right: 100px; top: 96px; text-align: right; }
+      .counter .lab {
+        font-size: 22px; font-weight: 700; letter-spacing: 0.2em;
+        color: var(--muted); text-transform: uppercase;
+      }
+      .counter .val {
+        font-family: "Mono", monospace; font-size: 96px; font-weight: 600;
+        color: var(--coral); letter-spacing: -0.04em; line-height: 1.05;
+        font-variant-numeric: tabular-nums;
+      }
+      .counter .unit { font-size: 23px; color: var(--muted); }
+      .list { position: absolute; left: 96px; top: 500px; width: 300px; }
+      .list .head {
+        font-size: 19px; font-weight: 700; letter-spacing: 0.3em;
+        color: var(--faint); text-transform: uppercase;
+        border-bottom: 2px solid rgba(217,119,87,0.7); padding-bottom: 14px;
+      }
+      .row {
+        display: flex; flex-wrap: nowrap; align-items: baseline; gap: 10px;
+        padding: 9px 0; font-size: 23px; color: var(--faint);
+      }
+      .row .n { font-family: "Mono", monospace; font-size: 18px; color: var(--faint); width: 26px; }
+      .row .name { flex: 1; }
+      .row .v { font-family: "Mono", monospace; font-size: 21px; }
+      .row.on { color: var(--cream); }
+      .row.on .v { color: var(--coral); }
+      .foot { position: absolute; left: 96px; bottom: 62px; font-size: 20px; color: #6b615a; }
+      .bar { position: absolute; left: 96px; bottom: 30px; right: 96px; height: 3px; background: rgba(255,255,255,0.07); }
+      .bar i { display: block; height: 100%; width: 0%; background: var(--coral); }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="6"
+      data-width="1920"
+      data-height="1080"
+    >
+      <div id="grid"></div>
+      <canvas id="map" width="1920" height="1080" class="clip" data-start="0" data-duration="6" data-track-index="0"></canvas>
+      <div class="kicker clip" data-start="0" data-duration="6" data-track-index="1">Geopolítica · demografía</div>
+      <h1 class="clip" data-start="0" data-duration="6" data-track-index="1">Dónde vive la gente</h1>
+      <div class="sub clip" data-start="0" data-duration="6" data-track-index="1">cada punto es un lugar habitado · 5.322 puntos</div>
+      <div class="counter clip" data-start="0" data-duration="6" data-track-index="1">
+        <div class="lab">en ocho países</div>
+        <div class="val" id="cval">0</div>
+        <div class="unit">millones de personas</div>
+      </div>
+      <div class="list clip" data-start="0" data-duration="6" data-track-index="1">
+        <div class="head">Los ocho primeros</div>
+        <div id="rows"></div>
+      </div>
+      <div class="foot clip" data-start="0" data-duration="6" data-track-index="1">Natural Earth · Our World in Data · población 2024</div>
+      <div class="bar clip" data-start="0" data-duration="6" data-track-index="1"><i id="prog"></i></div>
+    </div>
+    <script>
+      const NAMES = { IND: "India", CHN: "China", USA: "EE. UU.", IDN: "Indonesia",
+                      PAK: "Pakistán", NGA: "Nigeria", BRA: "Brasil", BGD: "Bangladés" };
+      const POP = { IND: 1451, CHN: 1419, USA: 345, IDN: 283, PAK: 251, NGA: 233, BRA: 212, BGD: 174 };
+      const ORDER = ["IND", "CHN", "USA", "IDN", "PAK", "NGA", "BRA", "BGD"];
+      const START = { IND: 1.5, CHN: 2.0, USA: 2.5, IDN: 3.0, PAK: 3.5, NGA: 4.0, BRA: 4.5, BGD: 5.0 };
+
+      const canvas = document.getElementById("map");
+      const ctx = canvas.getContext("2d");
+      let pts = [], hot = [], hotOn = {};
+
+      const rowsEl = document.getElementById("rows");
+      ORDER.forEach((iso, i) => {
+        const r = document.createElement("div");
+        r.className = "row";
+        r.id = "row-" + iso;
+        r.innerHTML = `<span class="n">${i + 1}</span><span class="name">${NAMES[iso]}</span><span class="v">${POP[iso]}</span>`;
+        rowsEl.appendChild(r);
+      });
+
+      function draw(now) {
+        ctx.clearRect(0, 0, 1920, 1080);
+        for (let i = 0; i < pts.length; i++) {
+          const reveal = 0.35 + (pts[i][0] / 1920) * 0.55;
+          if (now < reveal) continue;
+          let col = "#3a3129", r = 2.7;
+          for (let k = 0; k < 8; k++) {
+            if (hot[i][k] && hotOn[ORDER[k]] !== undefined && now >= hotOn[ORDER[k]]) {
+              col = "#d97757"; r = 4.1; break;
+            }
+          }
+          ctx.fillStyle = col;
+          ctx.beginPath();
+          ctx.arc(pts[i][0], pts[i][1], r, 0, 6.2832);
+          ctx.fill();
+        }
+      }
+
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo(".kicker", { opacity: 0, x: -18 }, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" }, 0.1);
+      tl.fromTo("h1", { opacity: 0, y: 26, filter: "blur(10px)" },
+                { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.85, ease: "power4.out" }, 0.25);
+      tl.fromTo(".sub", { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "power2.out" }, 0.7);
+      tl.fromTo(".counter", { opacity: 0, x: 24 }, { opacity: 1, x: 0, duration: 0.7, ease: "power3.out" }, 0.9);
+      tl.fromTo(".list .head", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 1.1);
+      tl.fromTo(".foot", { opacity: 0 }, { opacity: 1, duration: 0.6 }, 1.2);
+      ORDER.forEach((iso, i) => {
+        tl.fromTo("#row-" + iso, { opacity: 0, x: -14 },
+                  { opacity: 1, x: 0, duration: 0.45, ease: "power2.out" }, START[iso]);
+        tl.call(() => document.getElementById("row-" + iso).classList.add("on"), null, START[iso]);
+        tl.set(hotOn, { [iso]: START[iso] }, START[iso]);
+      });
+      tl.to("#prog", { width: "100%", duration: 6, ease: "none" }, 0);
+      const obj = { v: 0, total: 0 };
+      ORDER.forEach((iso, i) => {
+        tl.to(obj, { v: ORDER.slice(0, i + 1).reduce((a, k) => a + POP[k], 0), duration: 0.6,
+                     ease: "power2.out", onUpdate: () => {
+                       document.getElementById("cval").textContent =
+                         obj.v.toLocaleString("es-ES", { maximumFractionDigits: 0 });
+                     } }, START[iso]);
+      });
+      tl.eventCallback("onUpdate", () => draw(tl.time()));
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = tl;
+      fetch("./geo.json").then(r => r.json()).then(d => {
+        pts = d.pts; hot = d.hot; draw(0); tl.seek(0);
+      });
+      tl.seek(0);
+    </script>
+  </body>
+</html>
