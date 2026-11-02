@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=1920, height=1080" />
+  <title>Cuatro marcas · HyperFrames</title>
+  <style>
+    @font-face { font-family: "Inter"; src: url("assets/fonts/Inter-400.ttf") format("truetype"); font-weight: 400; }
+    @font-face { font-family: "Inter"; src: url("assets/fonts/Inter-700.ttf") format("truetype"); font-weight: 700; }
+    @font-face { font-family: "JetBrainsMono"; src: url("assets/fonts/JetBrainsMono-400.ttf") format("truetype"); }
+    html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden;
+                 background: radial-gradient(120% 80% at 50% 0%, #1a1512 0%, #0d0a08 70%); color: #f5ede3; }
+    .kick { position: absolute; left: 96px; top: 96px; font: 700 20px/1 "Inter"; letter-spacing: .3em;
+            text-transform: uppercase; color: #a2937f; }
+    .kick::before { content: ""; position: absolute; left: -22px; top: -4px; width: 7px; height: 28px; background: #d97757; }
+    h1 { position: absolute; left: 92px; top: 168px; margin: 0; font: 700 74px/1.08 "Inter"; letter-spacing: -.02em; max-width: 1500px; }
+    ul { position: absolute; left: 96px; top: 400px; margin: 0; padding: 0; list-style: none; }
+    li { display: flex; align-items: baseline; gap: 28px; height: 110px; font: 700 54px/1 "Inter"; }
+    li small { font: 400 22px/1 "JetBrainsMono"; color: #a2937f; letter-spacing: .04em; }
+    .dot { width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
+    .foot { position: absolute; left: 96px; bottom: 96px; font: 400 22px/1.5 "JetBrainsMono"; color: #a2937f; }
+  </style>
+</head>
+<body>
+  <div id="stage" data-composition-id="main" data-start="0" data-fps="30"
+       data-width="1920" data-height="1080" data-duration="4">
+    <div class="clip" data-start="0" data-duration="4" data-track-index="0">
+      <div class="kick">Cuatro marcas · cuatro nichos</div>
+      <h1 id="t">Cuatro marcas, cuatro nichos, un motor</h1>
+      <ul>
+        <li><span class="dot" style="background:#d97757"></span>MERIDIANO<small>geopolítica · 30,0 s</small></li>
+        <li><span class="dot" style="background:#4ea8ff"></span>CIFRA<small>economía · 29,7 s</small></li>
+        <li><span class="dot" style="background:#1f6b4a"></span>UMBRAL<small>energía · 30,7 s</small></li>
+        <li><span class="dot" style="background:#9d8cff"></span>CENIT<small>astronomía · 29,7 s</small></li>
+      </ul>
+      <div class="foot">hyperframes render . -c compositions/&lt;canal&gt;.html</div>
+    </div>
+  </div>
+  <script src="vendor/gsap.min.js"></script>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo(".kick", { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" }, 0.1);
+    tl.fromTo("#t", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 0.25);
+    tl.fromTo("li", { opacity: 0, x: -18 }, { opacity: 1, x: 0, duration: 0.5, stagger: 0.18, ease: "power2.out" }, 0.8);
+    tl.fromTo(".foot", { opacity: 0 }, { opacity: 1, duration: 0.6 }, 1.7);
+    window.__timelines = { main: tl };
+    tl.seek(0);
+  </script>
+</body>
+</html>

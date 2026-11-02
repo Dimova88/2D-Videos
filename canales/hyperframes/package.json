@@ -1,0 +1,15 @@
+{
+  "name": "canales-hyperframes",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Las cuatro marcas de canal renderizadas en HTML + GSAP con HyperFrames",
+  "type": "module",
+  "scripts": {
+    "render": "./render.sh",
+    "render:one": "hyperframes render . -c compositions/meridiano.html -o renders/meridiano.mp4 --fps 30 -q looks"
+  },
+  "dependencies": {
+    "gsap": "^3.13.0",
+    "hyperframes": "^0.9.5"
+  }
+}

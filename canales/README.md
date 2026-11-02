@@ -13,6 +13,17 @@ que no se parecen en nada.
 | 03 UMBRAL | `out/umbral_30s.mp4` | `out/umbral_portada.png` | `out/hoja_umbral.png` |
 | 04 CENIT | `out/cenit_30s.mp4` | `out/cenit_portada.png` | `out/hoja_cenit.png` |
 
+**Mismo guion, renderizado dos veces**: cada pieza existe en dos motores, con el mismo
+audio y los mismos cortes. `_30s.mp4` = Python + Pillow; `_hf.mp4` = HTML + GSAP con
+HyperFrames (ver `hyperframes/README.md`, con tiempos y diferencias medidas).
+
+| Canal | Python | HyperFrames |
+|---|---|---|
+| MERIDIANO | `out/meridiano_30s.mp4` | `out/meridiano_hf.mp4` · `out/hf_meridiano.png` |
+| CIFRA | `out/cifra_30s.mp4` | `out/cifra_hf.mp4` · `out/hf_cifra.png` |
+| UMBRAL | `out/umbral_30s.mp4` | `out/umbral_hf.mp4` · `out/hf_umbral.png` |
+| CENIT | `out/cenit_30s.mp4` | `out/cenit_hf.mp4` · `out/hf_cenit.png` |
+
 Comparativa de las cuatro portadas: `out/portadas.png`.
 Fotogramas de los 4×5 planos: `out/hoja_contactos.png`.
 Manual de marca completo: **`MARCAS.md`**.
@@ -62,6 +73,7 @@ python src/build.py                    # los cuatro canales
 python src/build.py umbral cenit       # solo dos
 python src/audit.py                    # tabla de empaquetado de las 4 piezas
 python src/sheets.py                   # hojas de contactos
+cd hyperframes && npm install && ./render.sh   # las cuatro piezas, en HTML + GSAP
 ```
 
 Cada vídeo tarda unos 3–4 minutos (900 fotogramas a 1080p con supersampling 2×).
