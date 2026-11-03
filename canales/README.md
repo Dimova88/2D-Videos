@@ -33,6 +33,8 @@ Todos: 1920×1080 · 30 fps · H.264 + AAC 48 kHz · −14 LUFS.
 Auditoría de empaquetado (lo único medible sin publicar): **`AUDITORIA.md`**,
 `out/auditoria.png` y `out/auditoria.json`.
 
+Comparativa de nichos — vida longeva frente a rendimiento en YouTube: **`NICHOS.md`**.
+
 ## Qué es cada marca, en una línea
 
 - **MERIDIANO** · *El mundo, medido* — geopolítica en mapas. Cálido, editorial, Instrument
