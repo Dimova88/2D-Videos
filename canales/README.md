@@ -35,6 +35,9 @@ Auditoría de empaquetado (lo único medible sin publicar): **`AUDITORIA.md`**,
 
 Comparativa de nichos — vida longeva frente a rendimiento en YouTube: **`NICHOS.md`**.
 
+Motion pass v2 — cómo se copió el lenguaje visual de un vídeo de referencia con
+Agent Reach, la skill `watch` y yt-dlp, y qué no se pudo hacer: **`hyperframes/ESTILO.md`**.
+
 ## Qué es cada marca, en una línea
 
 - **MERIDIANO** · *El mundo, medido* — geopolítica en mapas. Cálido, editorial, Instrument
@@ -76,6 +79,7 @@ python src/build.py umbral cenit       # solo dos
 python src/audit.py                    # tabla de empaquetado de las 4 piezas
 python src/sheets.py                   # hojas de contactos
 cd hyperframes && npm install && ./render.sh   # las cuatro piezas, en HTML + GSAP
+python tools/style_ref.py out/cenit_hf.mp4     # mide el ritmo del resultado
 ```
 
 Cada vídeo tarda unos 3–4 minutos (900 fotogramas a 1080p con supersampling 2×).

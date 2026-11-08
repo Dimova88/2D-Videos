@@ -72,7 +72,32 @@ tenía.
   de render por segundo de vídeo.
 - **Madurez.** `hyperframes@0.9.5` es pre-1.0 y publica casi a diario.
 
-## Tiempos medidos (mismo sandbox, 1 worker, sin GPU)
+## Motion pass v2
+
+La v1 se movía, pero se movía como una presentación: cada plano entraba y salía con
+un fundido y la cámara estaba clavada. La v2 copia la gramática de los canales de
+referencia (ver **`ESTILO.md`**): cortes duros tapados por un barrido de color,
+cámara que empuja y deriva, pegatinas que señalan el dato, subrayado de marcador
+bajo la palabra que se está diciendo, cursor que pulsa el botón de suscripción y
+etiqueta de capítulo. Medido con `../tools/style_ref.py` sobre los MP4:
+
+| Pieza | Movimiento dentro de plano | |
+|---|---|---|
+| MERIDIANO | 0,0148 → **0,0557** | ×3,8 |
+| CIFRA | 0,0138 → **0,0410** | ×3,0 |
+| UMBRAL | 0,0311 → **0,0605** | ×1,9 |
+| CENIT | 0,0165 → **0,0313** | ×1,9 |
+
+(fracción del lienzo que cambia entre fotogramas consecutivos dentro de un plano)
+
+El precio: **10 min 29 s** en total frente a 8 min 08 s de la v1 — la capa `.camera`
+obliga a recomponer el plano entero en cada fotograma. Sigue siendo más rápido que
+Pillow (10 min 24 s) en tres de las cuatro piezas, y solo CENIT lo supera.
+
+Las métricas de cada pieza quedan en `../out/ritmo/<marca>.json` y
+`../out/ritmo/<marca>.png` (hoja de contactos con los planos detectados).
+
+## Tiempos medidos en la v1 (mismo sandbox, 1 worker, sin GPU)
 
 | Pieza | HyperFrames | Python + Pillow | Ratio |
 |---|---|---|---|

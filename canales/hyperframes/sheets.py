@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Hoja de contactos de los cuatro renders de HyperFrames (5 fotogramas por pieza).
 
-Usa los cortes reales de `../build/timeline.json`, igual que el motor de Python,
+Usa los cortes reales del montaje (timings.js o ../build/timeline.json), igual que el motor de Python,
 para que las hojas de los dos motores se puedan poner una al lado de la otra.
 """
 from __future__ import annotations
@@ -38,8 +38,19 @@ def font(name, size):
     return ImageFont.truetype(os.path.join(FONTS, name), size)
 
 
+def timings():
+    """Cortes y duración. `../build/timeline.json` lo genera el motor de Python y no
+    se versiona; `assets/data/timings.js` tiene los mismos números y sí está en el
+    repo, así que las hojas se pueden regenerar desde un clon limpio."""
+    path = os.path.join(BUILD, "timeline.json")
+    if os.path.exists(path):
+        return json.load(open(path))
+    js = open(os.path.join(HERE, "assets", "data", "timings.js")).read()
+    return json.loads(js[js.index("timings"):].split("=", 1)[1].strip().rstrip(";"))
+
+
 def shots(key):
-    tl = json.load(open(os.path.join(BUILD, "timeline.json")))[key]
+    tl = timings()[key]
     cuts = [0.0] + list(tl["cuts"]) + [tl["dur"]]
     return [(a + 0.78 * (b - a)) for a, b in zip(cuts[:-1], cuts[1:])], tl["dur"]
 

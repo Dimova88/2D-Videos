@@ -114,6 +114,104 @@ function cta(b) {
   return n;
 }
 
+/* ------------------------------------------------------------- motion pass v2 */
+/* Pegatina: tarjeta girada que cae sobre el dato. Aparece con rebote y luego
+   flota 2-3 px para que nunca esté completamente quieta. */
+function sticker(S, { text, x, y, rot = -3, tail = "50%", notail = false, at = 1.0, width }) {
+  const n = h("div", "sticker" + (notail ? " notail" : ""), text);
+  n.style.left = x + "px";
+  n.style.top = y + "px";
+  n.style.setProperty("--tail-x", tail);
+  if (width) n.style.width = width + "px";
+  n.style.opacity = 0;
+  S.sec.appendChild(n);
+  S.stickers = S.stickers || [];
+  S.stickers.push({ el: n, rot, at });
+  return n;
+}
+
+/* Subrayado de marcador: barra dentro del span de la palabra. El span abre su
+   propio contexto de apilado (z-index:0) y la barra va en z-index:-1: queda detrás
+   de las letras y delante del fondo. La primera versión, sin el contexto, dejaba
+   la barra detrás del fondo de la sección y no se veía. */
+function underlineWord(span) {
+  if (!span) return null;
+  span.style.position = "relative";
+  span.style.zIndex = "0";
+  const bar = h("i", "hl-bar");
+  span.appendChild(bar);
+  return bar;
+}
+
+/* Marca la última palabra de un titular. Si el titular ya está partido en
+   palabras (rise() de los planos-frase) usa el último span; si no, lo parte
+   aquí mismo. Así el gesto funciona igual en los cuatro cierres. */
+function markWord(el, tl, when) {
+  if (!el) return null;
+  let span = [...el.querySelectorAll(".w")].pop();
+  if (!span) {
+    const t = el.textContent.trim();
+    const i = t.lastIndexOf(" ");
+    if (i > 0) {
+      el.textContent = "";
+      el.appendChild(document.createTextNode(t.slice(0, i + 1)));
+      span = h("span", "w", t.slice(i + 1));
+      el.appendChild(span);
+    } else {
+      span = el;
+    }
+  }
+  const bar = underlineWord(span);
+  tl.fromTo(bar, { scaleX: 0 }, { scaleX: 1, duration: 0.55, ease: "power3.out" }, when);
+  return bar;
+}
+
+/* Cursor que entra, pulsa el botón y desaparece. Es el gesto que más se repite
+   en los canales de referencia para cerrar: "esto se pulsa". */
+function clickCursor(S, target, { at = 1.3, dur = 1.2 } = {}) {
+  if (!target) return null;
+  /* Posición tomada del layout del propio padre (offsetLeft/Top), no del
+     getBoundingClientRect del escenario: así no influyen la cámara ni el
+     transform de entrada, que es lo que antes dejaba el cursor a 300 px. */
+  const parent = target.parentElement || S.sec;
+  if (getComputedStyle(parent).position === "static") parent.style.position = "relative";
+  const px = target.offsetLeft + target.offsetWidth * 0.80;
+  const py = target.offsetTop + target.offsetHeight * 0.55;
+
+  const svg = h("div", "pointer");
+  svg.innerHTML = `<svg viewBox="0 0 24 24" width="34" height="34"><path d="M4 2 L4 20 L9 15 L12.5 22 L16 20.5 L12.5 13.5 L19.5 13 Z"
+    fill="#fff" stroke="#111" stroke-width="1.4" stroke-linejoin="round"/></svg>`;
+  svg.style.left = px + 6 + "px";
+  svg.style.top = py + 4 + "px";
+  const rip = h("div", "ripple");
+  rip.style.left = px - 28 + "px";
+  rip.style.top = py - 28 + "px";
+  rip.style.width = "56px";
+  rip.style.height = "56px";
+  parent.append(rip, svg);
+  S.cursor = { svg, rip, at, dur };
+  return S.cursor;
+}
+
+function cursorAnim(tl, S, start) {
+  if (!S.cursor) return;
+  const { svg, rip, at, dur } = S.cursor;
+  tl.fromTo(svg, { opacity: 0, x: 74, y: 96, scale: 1.15 },
+    { opacity: 1, x: 0, y: 0, scale: 1, duration: 0.40, ease: "power3.out" }, start + at);
+  tl.to(rip, { scale: 1.9, opacity: 0.9, duration: 0.22, ease: "power2.out" }, start + at + 0.55);
+  tl.to(rip, { scale: 2.4, opacity: 0, duration: 0.5, ease: "power2.out" }, start + at + 0.75);
+  tl.to(svg, { scale: 0.9, duration: 0.1, yoyo: true, repeat: 1 }, start + at + 0.55);
+  tl.to(svg, { opacity: 0, duration: 0.35, ease: "power2.in" }, start + at + dur - 0.35);
+}
+
+/* Cámara: empujón de entrada + deriva lenta durante todo el plano. Es lo que
+   convierte una diapositiva en un plano. */
+function cameraAnim(tl, S, cam) {
+  const { start, dur } = S;
+  tl.fromTo(cam, { scale: 1.045 }, { scale: 1, duration: 0.55, ease: "expo.out" }, start);
+  tl.to(cam, { scale: 1.018, duration: Math.max(dur - 0.55, 0.4), ease: "none" }, start + 0.55);
+}
+
 /* ------------------------------------------------------------------ ensamblado */
 function build(key) {
   const b = BRANDS[key];
@@ -138,14 +236,59 @@ function build(key) {
     const S = { sec, start, dur, b, key, i, total };
 
     body(scene, S);
+
+    // todo el contenido del plano vive dentro de una cámara que se mueve
+    const cam = h("div", "camera");
+    while (sec.firstChild) cam.appendChild(sec.firstChild);
+    sec.appendChild(cam);
+    S.cam = cam;
+
+    // pegatinas: rebote de entrada + flotación continua
+    (S.stickers || []).forEach(({ el, rot, at }, k) => {
+      tl.fromTo(el, { opacity: 0, scale: 0.62, rotate: rot - 10, y: -14 },
+        { opacity: 1, scale: 1, rotate: rot, y: 0, duration: 0.55, ease: "back.out(2.2)" }, start + at);
+      tl.to(el, { y: -5, duration: 1.6 + k * 0.2, ease: "sine.inOut", yoyo: true, repeat: 3 }, start + at + 0.6);
+    });
+    cursorAnim(tl, S, start);
+    cameraAnim(tl, S, cam);
+
     if (scene.render) renders.push({ fn: scene.render, sec, start, dur });
 
-    // entrada y salida: fundido corto, como el "dip" del motor de Python
+    // Cortes duros, tapados por el barrido: los canales de referencia cortan,
+    // no disuelven. Solo hay fundido en la primera entrada y en la última salida.
     tl.set(sec, { autoAlpha: 1 }, start);
-    tl.fromTo(sec, { opacity: 0 }, { opacity: 1, duration: i === 0 ? 0.22 : 0.16, ease: "none" }, start);
-    tl.to(sec, { opacity: 0, duration: 0.18, ease: "none" }, end - 0.18);
+    if (i === 0) tl.fromTo(sec, { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "none" }, start);
     tl.set(sec, { autoAlpha: 0 }, end);
   });
+
+  // capítulo: una etiqueta que dice en qué plano estamos
+  const chapter = h("div", "chapter");
+  stage.appendChild(chapter);
+  const CHAPTERS = {
+    meridiano: ["Firma", "El dato", "El mapa", "La frase", "Cierre"],
+    cifra: ["Firma", "Año 2000", "El ranking", "× 15", "Cierre"],
+    umbral: ["Firma", "El dato", "La curva", "La frase", "Cierre"],
+    cenit: ["Firma", "La estrella", "El sistema", "La frase", "Cierre"],
+  };
+  (CHAPTERS[key] || []).forEach((name, i) => {
+    const start = bounds[i];
+    tl.call(() => { chapter.textContent = String(i + 1).padStart(2, "0") + " · " + name; }, null, start);
+  });
+  tl.to(chapter, { opacity: 0, duration: 0.4 }, total - 0.5);
+
+  // barrido en cada corte interno: tapa el empalme en vez de fundir a negro
+  const wipe = h("div", "wipe", "<i></i><i></i><i></i>");
+  stage.appendChild(wipe);
+  T.cuts.forEach((cut, i) => {
+    const wide = i === 0 ? 0.40 : 0.28;        // el primer corte se toma su tiempo
+    tl.fromTo(wipe, { xPercent: -125, opacity: 1 },
+      { xPercent: 125, duration: wide, ease: "power2.inOut" }, cut - wide * 0.52);
+    tl.set(wipe, { opacity: 0 }, cut + wide * 0.52);
+  });
+
+  // último plano: fundido a negro antes del final
+  tl.to(stage.querySelectorAll(".scene")[SCENES[key].length - 1],
+       { opacity: 0, duration: 0.22, ease: "none" }, total - 0.24);
 
   tl.eventCallback("onUpdate", () => {
     const t = tl.time();

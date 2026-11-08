@@ -39,10 +39,22 @@ def font(name, size):
     return ImageFont.truetype(os.path.join(FONTS, name), size)
 
 
+def timeline(key):
+    """Cortes y duración del canal. `build/timeline.json` lo genera build.py y no se
+    versiona, así que si no está se leen los mismos números de `assets/data/timings.js`
+    (que sí está en el repo): así las hojas se pueden regenerar desde un clon limpio."""
+    path = os.path.join(BUILD, "timeline.json")
+    if os.path.exists(path):
+        return json.load(open(path))[key]
+    js = open(os.path.join(ROOT, "hyperframes", "assets", "data", "timings.js")).read()
+    data = json.loads(js[js.index("timings") :].split("=", 1)[1].strip().rstrip(";"))
+    return data[key]
+
+
 def shots(key):
     """Un fotograma por plano, al 78 % del plano: la composición ya está asentada
     (el 50 % pilla las animaciones de entrada a medio hacer)."""
-    tl = json.load(open(os.path.join(BUILD, "timeline.json")))[key]
+    tl = timeline(key)
     cuts = [0.0] + list(tl["cuts"]) + [tl["dur"]]
     return [(a + 0.78 * (b - a)) for a, b in zip(cuts[:-1], cuts[1:])], tl["dur"]
 

@@ -219,6 +219,7 @@ const MERIDIANO = [
         fontSize: "17px", fontWeight: 700, letterSpacing: ".3em", color: b.dim, marginBottom: "12px",
       });
       S.listHead = head;
+      sticker(S, { text: "<b>8</b> países · <b>4.368</b> M personas", x: 1180, y: 812, rot: -2.5, tail: "34%", at: 1.9 });
       caption(S, "Natural Earth · Our World in Data", { y: 1000 });
     },
     anim(tl, S) {
@@ -260,6 +261,7 @@ const MERIDIANO = [
     anim(tl, S) {
       fadeIn(tl, S.l1, S.start + 0.2, 0.8, 18);
       fadeIn(tl, S.l2, S.start + 0.9, 0.9, 18);
+      markWord(S.l2, tl, S.start + 1.45);   // "geografía." se subraya mientras se dice
       growRule(tl, S.rl, S.start + 1.9, 0.7);
       fadeIn(tl, S.sg, S.start + 2.05, 0.7);
     },
@@ -380,6 +382,7 @@ const CIFRA = [
       unit.textContent = "BILLONES $";
       S.sec.appendChild(yr); S.sec.appendChild(unit);
       S.yr = yr;
+      sticker(S, { text: "China <b>6.º → 2.º</b>", x: 1306, y: 470, rot: 2.5, tail: "20%", at: 1.3 });
     },
     anim(tl, S) {
       fadeIn(tl, S.sec.querySelector(".kicker"), S.start + 0.1, 0.5);
@@ -452,6 +455,8 @@ const CIFRA = [
       fadeIn(tl, S.h2, S.start + 0.55, 0.8, 22);
       fadeIn(tl, S.card, S.start + 0.75, 0.7, 14);
       fadeIn(tl, S.nxt, S.start + 1.05, 0.7);
+      clickCursor(S, S.card.querySelector(".btn"), { at: 1.15 });
+      markWord(S.h2, tl, S.start + 1.05);
       tl.fromTo(S.tk, { x: 0 }, { x: -260 * 4, duration: Math.max(S.dur - 0.6, 1), ease: "none" }, S.start + 0.3);
     },
   },
@@ -571,6 +576,7 @@ const UMBRAL = [
         return row;
       });
       S.sec.appendChild(leg);
+      sticker(S, { text: "carbón <b>36 % → 1 %</b> · −97 %", x: 1156, y: 806, rot: 2.5, tail: "18%", at: 1.4 });
       caption(S, "participación en la generación eléctrica · Our World in Data", { y: 962 });
     },
     anim(tl, S) {
@@ -622,6 +628,7 @@ const UMBRAL = [
       fadeIn(tl, S.card, S.start + 0.1, 0.8, 12);
       fadeIn(tl, S.l1, S.start + 0.5, 0.8, 16);
       fadeIn(tl, S.l2, S.start + 1.15, 0.85, 16);
+      markWord(S.l2, tl, S.start + 1.45);
       growRule(tl, S.rl, S.start + 1.9, 0.7);
       fadeIn(tl, S.ft, S.start + 2.0, 0.7);
     },
@@ -646,6 +653,8 @@ const UMBRAL = [
       fadeIn(tl, S.h2, S.start + 0.5, 0.8, 20);
       fadeIn(tl, S.card, S.start + 0.7, 0.7, 14);
       fadeIn(tl, S.nxt, S.start + 1.0, 0.7);
+      clickCursor(S, S.card.querySelector(".btn"), { at: 1.05 });
+      markWord(S.h2, tl, S.start + 0.95);
     },
   },
 ];
@@ -732,6 +741,7 @@ const CENIT = [
       Object.assign(rl.style, { left: "96px", top: "566px", width: "340px", height: "1px", background: b.ink, opacity: ".18" });
       [hr, ds, rl].forEach((n) => S.sec.appendChild(n));
       S.hr = hr; S.ds = ds; S.rl = rl;
+      sticker(S, { text: "<b>300</b> años luz", x: 1236, y: 604, rot: 3, tail: "16%", at: 1.7 });
     },
     anim(tl, S) {
       tl.fromTo(S.focus, { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.9, ease: "power2.out" }, S.start + 0.5);
@@ -764,6 +774,7 @@ const CENIT = [
       Object.assign(kmv.style, { position: "absolute", right: "96px", top: "574px", fontSize: "34px", color: b.accent3 });
       [d1, day, km, kmv].forEach((n) => S.sec.appendChild(n));
       S.day = day; S.kmv = kmv; S.kmLabel = km;
+      sticker(S, { text: "1 año = <b>940 M km</b>", x: 1300, y: 742, rot: -2.5, tail: "20%", at: 1.6 });
     },
     anim(tl, S) {
       fadeIn(tl, [S.sec.querySelector(".daylabel"), S.day, S.kmLabel, S.kmv], S.start + 0.4, 0.6);
@@ -807,6 +818,7 @@ const CENIT = [
     anim(tl, S) {
       fadeIn(tl, S.l1, S.start + 0.2, 0.9, 20);
       fadeIn(tl, S.l2, S.start + 1.0, 0.9, 20);
+      markWord(S.l2, tl, S.start + 1.3);
       fadeIn(tl, S.sg, S.start + 1.9, 0.8);
     },
     render(t, sec) { sec.querySelector("canvas").__stars(t); },
@@ -855,6 +867,8 @@ const CENIT = [
       fadeIn(tl, [S.l1, S.l2], S.start + 0.6, 0.8, 14);
       tl.fromTo(S.btn, { scale: 0.9, opacity: 0, transformOrigin: "50% 50%" }, { scale: 1, opacity: 1, duration: 0.7, ease: "back.out(1.8)" }, S.start + 1.1);
       fadeIn(tl, [S.hd, S.ts], S.start + 1.3, 0.7);
+      markWord(S.l2, tl, S.start + 1.25);
+      clickCursor(S, S.btn, { at: 1.5 });
     },
     render(t, sec) { sec.querySelector("canvas").__stars(t); },
   },

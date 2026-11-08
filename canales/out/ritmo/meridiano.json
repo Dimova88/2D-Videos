@@ -1,0 +1,55 @@
+{
+ "source": "out/meridiano_hf.mp4",
+ "file": "meridiano_hf.mp4",
+ "width": 1920,
+ "height": 1080,
+ "fps": 30.0,
+ "duration_s": 30.0,
+ "shots": 5,
+ "cut_threshold": "adaptativo (4× mediana / p96)",
+ "shot_mean_s": 6.0,
+ "shot_median_s": 6.8,
+ "cuts_per_min": 8.0,
+ "motion_in_shot": 0.0557,
+ "frames": [
+  {
+   "t": 0.96,
+   "lum": 0.0646,
+   "contrast": 0.04,
+   "sat": 0.4597,
+   "caption_mass": 0.0
+  },
+  {
+   "t": 5.98,
+   "lum": 0.0776,
+   "contrast": 0.0957,
+   "sat": 0.4594,
+   "caption_mass": 0.0
+  },
+  {
+   "t": 15.62,
+   "lum": 0.0995,
+   "contrast": 0.1053,
+   "sat": 0.4475,
+   "caption_mass": 0.0
+  },
+  {
+   "t": 21.96,
+   "lum": 0.0682,
+   "contrast": 0.0554,
+   "sat": 0.4571,
+   "caption_mass": 0.0
+  },
+  {
+   "t": 27.28,
+   "lum": 0.0717,
+   "contrast": 0.0633,
+   "sat": 0.4581,
+   "caption_mass": 0.0
+  }
+ ],
+ "sheet_px": [
+  1920,
+  636
+ ]
+}
