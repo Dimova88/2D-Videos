@@ -13,8 +13,14 @@ function fmt(n, dec = 0) {
   return n.toLocaleString("es-ES", { minimumFractionDigits: dec, maximumFractionDigits: dec });
 }
 
+/* Si falta un token de color, no se rompe el fotograma: se cae a un gris neutro.
+   (Un `undefined` aquí lanzaba TypeError a mitad del dibujo y dejaba el canvas y
+   los contadores a medias; ver V13/D1 en CHECKLIST.md.) */
+const FALLBACK_RGB = [140, 140, 140];
+
 function rgba(rgb, a) {
-  return `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${clamp(a)})`;
+  const c = Array.isArray(rgb) && rgb.length >= 3 ? rgb : FALLBACK_RGB;
+  return `rgba(${c[0]},${c[1]},${c[2]},${clamp(a)})`;
 }
 
 function hexToRgb(h) {

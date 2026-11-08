@@ -16,16 +16,16 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "..", "out")
 BUILD = os.path.join(HERE, "..", "build")
 FONTS = os.path.join(HERE, "assets", "fonts")
-BR = ["meridiano", "cifra", "umbral", "cenit"]
-NAME = {"meridiano": "MERIDIANO", "cifra": "CIFRA", "umbral": "UMBRAL", "cenit": "CENIT"}
+BR = ["meridiano", "cifra", "umbral", "cenit", "apex"]
+NAME = {"meridiano": "MERIDIANO", "cifra": "CIFRA", "umbral": "UMBRAL", "cenit": "CENIT", "apex": "APEX"}
 INK = {"meridiano": (245, 237, 227), "cifra": (233, 240, 247),
-       "umbral": (22, 36, 28), "cenit": (237, 234, 246)}
+       "umbral": (22, 36, 28), "cenit": (237, 234, 246), "apex": (244, 244, 242)}
 DIM = {"meridiano": (162, 147, 127), "cifra": (124, 140, 158),
-       "umbral": (95, 111, 102), "cenit": (140, 135, 166)}
+       "umbral": (95, 111, 102), "cenit": (140, 135, 166), "apex": (138, 144, 153)}
 BG = {"meridiano": (18, 14, 12), "cifra": (9, 13, 18),
-      "umbral": (238, 235, 228), "cenit": (6, 7, 12)}
+      "umbral": (238, 235, 228), "cenit": (6, 7, 12), "apex": (11, 12, 14)}
 LINE = {"meridiano": (58, 50, 44), "cifra": (32, 44, 58),
-        "umbral": (208, 204, 196), "cenit": (34, 34, 52)}
+        "umbral": (208, 204, 196), "cenit": (34, 34, 52), "apex": (38, 42, 49)}
 
 
 def ff():

@@ -63,6 +63,11 @@ body[data-brand="umbral"] {
   --accent: #1f6b4a; --accent2: #e9a23b; --accent3: #4f86a8; --panel: #ffffff;
   --f-display: "Manrope", sans-serif; --f-ui: "Manrope", sans-serif; --f-mono: "IBMPlexMono", monospace;
 }
+body[data-brand="apex"] {
+  --bg: #0b0c0e; --bg2: #15171c; --ink: #f4f4f2; --dim: #8a9099; --line: #262a31;
+  --accent: #ff3b30; --accent2: #ffc53d; --accent3: #b388ff; --panel: #14161a;
+  --f-display: "SpaceGrotesk", sans-serif; --f-ui: "Inter", sans-serif; --f-mono: "JetBrainsMono", monospace;
+}
 body[data-brand="cenit"] {
   --bg: #06070d; --bg2: #0d0f1a; --ink: #edeaf6; --dim: #8c87a6; --line: #1c1e30;
   --accent: #9d8cff; --accent2: #e4c387; --accent3: #7fd3e8; --panel: #12141f;
@@ -158,6 +163,10 @@ body[data-brand="umbral"] .bg-layer {
   background:
     radial-gradient(90% 70% at 12% 0%, #fffdf8 0%, #f4f1ea 45%, #ece8de 100%);
 }
+body[data-brand="apex"] .bg-layer {
+  background:
+    radial-gradient(70% 50% at 78% 8%, #1b1d22 0%, #0d0e11 60%, #08090b 100%);
+}
 body[data-brand="cenit"] .bg-layer {
   background:
     radial-gradient(90% 70% at 50% 8%, #12141f 0%, #08090f 55%, #04050a 100%);
@@ -196,9 +205,9 @@ body[data-brand="cenit"] .bg-layer {
   position: absolute; top: 0; bottom: 0; width: 15%;
   transform: skewX(-16deg);
 }
-.wipe i:nth-child(1) { left: 0;   background: linear-gradient(90deg, transparent, var(--accent) 55%, transparent); opacity: .9; }
-.wipe i:nth-child(2) { left: 13%; background: linear-gradient(90deg, transparent, var(--accent2) 60%, transparent); opacity: .55; width: 9%; }
-.wipe i:nth-child(3) { left: 21%; background: linear-gradient(90deg, transparent, var(--ink) 60%, transparent); opacity: .16; width: 5%; }
+.wipe i:nth-child(1) { left: 0;   background: linear-gradient(90deg, transparent, var(--accent) 55%, transparent); opacity: .62; }
+.wipe i:nth-child(2) { left: 13%; background: linear-gradient(90deg, transparent, var(--accent2) 60%, transparent); opacity: .38; width: 9%; }
+.wipe i:nth-child(3) { left: 21%; background: linear-gradient(90deg, transparent, var(--ink) 60%, transparent); opacity: .12; width: 5%; }
 
 /* pegatina: tarjeta girada con borde de color y sombra dura */
 .sticker {
@@ -224,7 +233,7 @@ body[data-brand="cenit"] .bg-layer {
    El span lleva z-index:0 para abrir su propio contexto de apilado; así la barra
    (z-index:-1) queda detrás de las letras pero delante del fondo de la sección. */
 .hl-bar {
-  position: absolute; left: -2%; right: -2%; bottom: .02em; height: .16em;
+  position: absolute; left: -3%; right: -3%; bottom: .03em; height: .13em;
   background: color-mix(in srgb, var(--accent) 55%, transparent);
   border-radius: 2px; transform-origin: left center; transform: scaleX(0);
   z-index: -1; pointer-events: none;

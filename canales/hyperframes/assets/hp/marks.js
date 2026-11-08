@@ -35,6 +35,17 @@ const MARK = {
       <line class="smoke" x1="6" y1="48" x2="42" y2="48" stroke="${c}" stroke-width="2" opacity="0.2"/>
     </svg>`,
 
+  apex: (c, a) => `
+    <svg class="mk" viewBox="-62 -62 124 124" width="100%" height="100%" fill="none">
+      <circle class="draw" pathLength="1" cx="0" cy="0" r="48" stroke="${c}" stroke-width="3" opacity="0.35"/>
+      <path class="draw" pathLength="1" d="M-46 26 L-18 26 Q -4 26 4 12 L 22 -20 Q 28 -30 40 -30 L 46 -30"
+            stroke="${c}" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path class="arrow" d="M34 -42 L50 -30 L34 -18" stroke="${a}" stroke-width="5"
+            stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <line class="draw" pathLength="1" x1="-46" y1="44" x2="46" y2="44" stroke="${a}" stroke-width="2"
+            opacity="0.7" stroke-dasharray="4 6"/>
+    </svg>`,
+
   cenit: (c, a) => `
     <svg class="mk" viewBox="-62 -62 124 124" width="100%" height="100%" fill="none">
       <polygon class="star" points="0,-46 6.5,-6.5 46,0 6.5,6.5 0,46 -6.5,6.5 -46,0 -6.5,-6.5"

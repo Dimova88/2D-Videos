@@ -1,8 +1,16 @@
-# ¿Cuál de los cuatro nichos aguanta más y funciona mejor?
+# ¿Cuál de los cinco nichos aguanta más y funciona mejor?
 
 Son **dos preguntas distintas** y tienen respuestas distintas. Este documento las separa,
 las puntúa con criterios explícitos y dice al final qué haría yo. Los pesos son un juicio,
 no una medición: están escritos para que se puedan discutir y cambiar.
+
+> **Nota sobre APEX (nicho nuevo).** Fórmula 1 es el nicho con más demanda y más
+> competencia de los cinco: el público es enorme y fiel, pero hay cientos de canales
+> haciendo lo mismo con imágenes de carrera que nosotros no tenemos (no hay derechos
+> ni material propio). Su ventaja aquí es otra: **los récords son datos duros y
+> verificables**, y se pueden contar sin una sola imagen de la retransmisión. Su riesgo
+> es de derechos de imagen y de actualidad (una parrilla cambia cada año). Puntuación
+> media, no la mejor: 3,50.
 
 ## 1. Vida longeva: cuánto dura un vídeo en el catálogo
 
@@ -11,7 +19,7 @@ tendencia caen a casi cero en **1–7 días**; las piezas evergreen bien optimiz
 trayendo tráfico de búsqueda **meses o años** [1]. La diferencia entre un canal que
 acumula catálogo y uno que corre en una cinta de correr es esa.
 
-Medido en **nuestras cuatro piezas** (`src/shots.py`, texto visible): cuántas
+Medido en **nuestras cinco piezas** (`src/shots.py`, texto visible): cuántas
 afirmaciones concretas caducan.
 
 | Pieza | Años citados en pantalla | Qué caduca | Vida útil de la pieza |
@@ -20,6 +28,7 @@ afirmaciones concretas caducan.
 | **UMBRAL** | 2000 → 2024 | el reparto eléctrico cambia despacio (1–2 pts/año) | 5–8 años |
 | **CIFRA** | 2000 → 2023 | el ranking del PIB y las cifras | 2–3 años |
 | **MERIDIANO** | 2024 | población 2024 y, sobre todo, el tema: si el mapa es noticia, caduca en semanas | semanas si es noticia · años si es «cómo funciona» |
+| **APEX** | 2005 → 2023 | los récords (1,80 s, 372,6 km/h) aguantan años; la parrilla de la temporada, no | récords: 5–10 años · actualidad: días |
 
 ## 2. Rendimiento en YouTube: cuánto crece y cuánto paga
 
@@ -38,6 +47,7 @@ no $25. Con esos márgenes, la longevidad pesa más que el CPM.
 | **CIFRA** · economía | 3 | 4 | **5** | 3 | **3,75** |
 | **CENIT** · astronomía | **5** | 2 | 3 | 4 | **3,50** |
 | **MERIDIANO** · geopolítica | 2 | **5** | 2 | 2 | **2,75** |
+| **APEX** · Fórmula 1 | 4 | **5** | 3 | 2 | **3,50** |
 
 - **Longevidad**: de lo medido en la tabla del punto 1.
 - **Demanda**: tamaño de la audiencia hispanohablante y capacidad de generar clic. Los

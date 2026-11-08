@@ -21,6 +21,12 @@ const BRANDS = {
     ink: "#16241c", dim: "#5f6f66", accent: "#1f6b4a", accent2: "#e9a23b", accent3: "#4f86a8",
     bg: "#f2efe8", light: true, uiWeight: 500, uiWeightBold: 700, displayWeight: 800,
   },
+  apex: {
+    key: "apex", name: "APEX", tagline: "La carrera, en datos",
+    handle: "@apex", teaser: "La próxima: la parada en boxes que batió el récord",
+    ink: "#f4f4f2", dim: "#8a9099", accent: "#ff3b30", accent2: "#ffc53d", accent3: "#b388ff",
+    bg: "#0b0c0e", light: false, uiWeight: 500, uiWeightBold: 700, displayWeight: 700,
+  },
   cenit: {
     key: "cenit", name: "CENIT", tagline: "El cielo, explicado",
     handle: "@cenit", teaser: "La próxima: qué hay dentro de un agujero negro",
@@ -226,6 +232,10 @@ function build(key) {
   const tl = gsap.timeline({ paused: true });
   const renders = [];
 
+  // el mundo: capa que vive durante todo el vídeo, debajo de los planos
+  const world = buildWorld(key, b, tl, total);
+  stage.appendChild(world.el);
+
   SCENES[key].forEach((scene, i) => {
     const start = bounds[i], end = bounds[i + 1], dur = end - start;
     const sec = h("section", "scene clip");
@@ -233,7 +243,7 @@ function build(key) {
     sec.dataset.duration = dur.toFixed(3);
     sec.dataset.trackIndex = String(i);
     stage.appendChild(sec);
-    const S = { sec, start, dur, b, key, i, total };
+    const S = { sec, start, dur, b, key, i, total, tl, renders: [] };
 
     body(scene, S);
 
@@ -253,6 +263,7 @@ function build(key) {
     cameraAnim(tl, S, cam);
 
     if (scene.render) renders.push({ fn: scene.render, sec, start, dur });
+    S.renders.forEach((fn) => renders.push({ fn, sec, start, dur }));
 
     // Cortes duros, tapados por el barrido: los canales de referencia cortan,
     // no disuelven. Solo hay fundido en la primera entrada y en la última salida.
@@ -269,6 +280,7 @@ function build(key) {
     cifra: ["Firma", "Año 2000", "El ranking", "× 15", "Cierre"],
     umbral: ["Firma", "El dato", "La curva", "La frase", "Cierre"],
     cenit: ["Firma", "La estrella", "El sistema", "La frase", "Cierre"],
+    apex: ["Firma", "El récord", "El trazado", "La frase", "Cierre"],
   };
   (CHAPTERS[key] || []).forEach((name, i) => {
     const start = bounds[i];
@@ -286,12 +298,30 @@ function build(key) {
     tl.set(wipe, { opacity: 0 }, cut + wide * 0.52);
   });
 
+  /* Los cues son la partitura: los mismos tiempos generan los sonidos en Python
+     (src/sfx.py) y aquí, además del destello, se enciende una micro-marca en el
+     borde superior que dura 4 fotogramas. La primera versión dibujaba una barra
+     con una raya por cue y se leía como un defecto de codificación: fuera. */
+  const CUES = (window.HPD.cues || {})[key] || [];
+  if (CUES.length) {
+    const flash = h("div", "hitflash");
+    Object.assign(flash.style, { position: "absolute", inset: "0", zIndex: "87", opacity: "0",
+      background: "var(--ink)", pointerEvents: "none" });
+    stage.appendChild(flash);
+    CUES.forEach((c) => {
+      if (c.k === "hit" || c.k === "impact") {
+        tl.fromTo(flash, { opacity: 0.06 }, { opacity: 0, duration: 0.16, ease: "power2.out" }, c.t);
+      }
+    });
+  }
+
   // último plano: fundido a negro antes del final
   tl.to(stage.querySelectorAll(".scene")[SCENES[key].length - 1],
        { opacity: 0, duration: 0.22, ease: "none" }, total - 0.24);
 
   tl.eventCallback("onUpdate", () => {
     const t = tl.time();
+    if (world.render) world.render(t);
     for (const r of renders) {
       if (t >= r.start - 0.05 && t <= r.start + r.dur + 0.05) r.fn(t - r.start, r.sec, b);
     }

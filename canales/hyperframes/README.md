@@ -72,6 +72,39 @@ tenía.
   de render por segundo de vídeo.
 - **Madurez.** `hyperframes@0.9.5` es pre-1.0 y publica casi a diario.
 
+## v3 · de diapositiva a vídeo
+
+La v2 arregló el movimiento dentro de cada plano. La v3 ataca el problema de fondo:
+seguía leyéndose como cinco diapositivas con animaciones encima. Cinco cambios
+estructurales:
+
+1. **Una capa de mundo** (`assets/hp/world.js`) que vive todo el vídeo por debajo de
+   los planos y no se reinicia con ellos: retícula y rosa de los vientos en MERIDIANO,
+   columnas y cinta de datos en CIFRA, papel y luz en UMBRAL, campo de estrellas
+   real en CENIT, líneas de velocidad en APEX. El fondo nunca se detiene.
+2. **Objetos de nicho** (`assets/hp/objects.js`), no solo gráficos: globo que gira,
+   arco de vuelo, chincheta y sello de pasaporte; monedas, recibo impreso; aspas de
+   aerogenerador, aguja de medidor, interruptor, tendido eléctrico; diafragma, cometa,
+   constelación; **semáforo de salida, cronómetro, neumáticos, trazado con coche,
+   velocímetro, sectores y bandera a cuadros**.
+3. **Tipografía cinética** (`kin()`): cada palabra en su máscara, entrando desde abajo,
+   con el subrayado de marcador cayendo en el acento.
+4. **Efectos de sonido** (`src/sfx.py`): 16 por pieza, sintetizados con numpy, en los
+   mismos tiempos que animan la imagen (`src/cues.py` → `assets/data/cues.js`).
+   Barridos en los cortes, golpes en las frases, rebotes en las pegatinas, dos clics
+   en el botón. APEX añade el único sonido de motor del proyecto.
+5. **Composiciones generadas**: `make_comps.py` escribe los cinco HTML desde
+   `timings.js`. Antes eran cinco archivos copiados a mano.
+
+| Archivo | Qué es |
+|---|---|
+| `assets/hp/world.js` | la capa que vive todo el vídeo |
+| `assets/hp/objects.js` | los objetos de nicho (SVG y canvas) |
+| `assets/hp/kinetic.css` | mundo, objetos, tipografía cinética, tarjeta de cierre |
+| `assets/data/apex.js` | datos de F1 con su fuente |
+| `make_comps.py` | genera `compositions/*.html` |
+| `check_globals.py` | falla si dos scripts declaran el mismo nombre global (los seis comparten ámbito) |
+
 ## Motion pass v2
 
 La v1 se movía, pero se movía como una presentación: cada plano entraba y salía con
@@ -83,12 +116,18 @@ etiqueta de capítulo. Medido con `../tools/style_ref.py` sobre los MP4:
 
 | Pieza | Movimiento dentro de plano | |
 |---|---|---|
-| MERIDIANO | 0,0148 → **0,0557** | ×3,8 |
-| CIFRA | 0,0138 → **0,0410** | ×3,0 |
-| UMBRAL | 0,0311 → **0,0605** | ×1,9 |
-| CENIT | 0,0165 → **0,0313** | ×1,9 |
+| MERIDIANO | 0,0148 → **0,0900** | ×6,1 |
+| CIFRA | 0,0138 → **0,1047** | ×7,6 |
+| UMBRAL | 0,0311 → **0,0767** | ×2,5 |
+| CENIT | 0,0165 → **0,0621** | ×3,8 |
+| APEX | — → **0,0924** | pieza nueva |
 
-(fracción del lienzo que cambia entre fotogramas consecutivos dentro de un plano)
+(fracción del lienzo que cambia entre fotogramas consecutivos dentro de un plano; v1 → v3)
+
+Y el ritmo, medido con el mismo script sobre los MP4 finales: **9,8–12,1 cortes por
+minuto** y un plano mediano de **1,9–4,9 s** (en la v1 eran 8 cortes/min y planos de
+5–8 s). Sigue sin llegar al ritmo de 1-3 s del vídeo de referencia, porque la narración
+manda; pero el movimiento dentro de plano ya no es el de una presentación.
 
 El precio: **10 min 29 s** en total frente a 8 min 08 s de la v1 — la capa `.camera`
 obliga a recomponer el plano entero en cada fotograma. Sigue siendo más rápido que

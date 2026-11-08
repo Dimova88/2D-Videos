@@ -17,16 +17,16 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "out")
 BUILD = os.path.join(ROOT, "build")
 FONTS = os.path.join(ROOT, "assets", "fonts")
-BR = ["meridiano", "cifra", "umbral", "cenit"]
-NAME = {"meridiano": "MERIDIANO", "cifra": "CIFRA", "umbral": "UMBRAL", "cenit": "CENIT"}
+BR = ["meridiano", "cifra", "umbral", "cenit", "apex"]
+NAME = {"meridiano": "MERIDIANO", "cifra": "CIFRA", "umbral": "UMBRAL", "cenit": "CENIT", "apex": "APEX"}
 INK = {"meridiano": (245, 237, 227), "cifra": (233, 240, 247),
-       "umbral": (22, 36, 28), "cenit": (237, 234, 246)}
+       "umbral": (22, 36, 28), "cenit": (237, 234, 246), "apex": (244, 244, 242)}
 DIM = {"meridiano": (162, 147, 127), "cifra": (124, 140, 158),
-       "umbral": (95, 111, 102), "cenit": (140, 135, 166)}
+       "umbral": (95, 111, 102), "cenit": (140, 135, 166), "apex": (138, 144, 153)}
 BG = {"meridiano": (18, 14, 12), "cifra": (9, 13, 18),
-      "umbral": (238, 235, 228), "cenit": (6, 7, 12)}
+      "umbral": (238, 235, 228), "cenit": (6, 7, 12), "apex": (11, 12, 14)}
 LINE = {"meridiano": (58, 50, 44), "cifra": (32, 44, 58),
-        "umbral": (208, 204, 196), "cenit": (34, 34, 52)}
+        "umbral": (208, 204, 196), "cenit": (34, 34, 52), "apex": (38, 42, 49)}
 
 
 def ff():
@@ -59,11 +59,19 @@ def shots(key):
     return [(a + 0.78 * (b - a)) for a, b in zip(cuts[:-1], cuts[1:])], tl["dur"]
 
 
+def video_of(key):
+    """Motor de Pillow si existe; si no (APEX solo existe en HyperFrames), el MP4 de HF."""
+    for name in (f"{key}_30s.mp4", f"{key}_hf.mp4"):
+        p = os.path.join(OUT, name)
+        if os.path.exists(p):
+            return p
+    raise FileNotFoundError(f"no hay vídeo para {key} en out/")
+
+
 def grab(key, t, tmp):
     path = os.path.join(tmp, f"{key}_{t:.2f}.png")
     subprocess.run([ff(), "-y", "-hide_banner", "-loglevel", "error", "-ss", f"{t:.3f}",
-                    "-i", os.path.join(OUT, f"{key}_30s.mp4"), "-frames:v", "1", path],
-                   check=True)
+                    "-i", video_of(key), "-frames:v", "1", path], check=True)
     return Image.open(path).convert("RGB")
 
 

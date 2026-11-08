@@ -71,6 +71,14 @@ Validación: sobre los cuatro vídeos detecta los cortes reales del montaje
    va. Y una etiqueta de capítulo arriba a la izquierda (`02 · LA ESTRELLA`) que
    cambia en cada plano, como el índice de un vídeo-ensayo.
 
+## v3 · lo que cambió después
+
+El motion pass v2 seguía leyéndose como diapositivas con animaciones encima. La v3
+añade tres capas que no existían: **un mundo que vive todo el vídeo** (no se reinicia
+con los planos), **objetos de nicho** en vez de solo gráficos, y **sonido** en cada
+acento. Los detalles están en `README.md` §v3 y las reglas de esta página se mantienen
+(los cinco gestos siguen ahí; ahora hay treinta y cinco animaciones de objeto más).
+
 ## Dónde está cada cosa
 
 | Archivo | Qué contiene |

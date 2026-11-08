@@ -154,6 +154,17 @@ BRANDS = {
         chord=(174.61, 220.0, 261.63), bpm=100,
         notes="Claro y optimista. Mucho aire, tarjetas, nada de sermones.",
     ),
+    "apex": Brand(
+        key="apex", name="APEX", tagline="La carrera, en datos",
+        niche="Fórmula 1 y motor", audience="20–45, carreras, ingeniería y apuestas de domingo",
+        bg=(11, 12, 14), bg2=(21, 23, 28), panel=(20, 22, 26), ink=(244, 244, 242),
+        dim=(138, 144, 153), line=(38, 42, 49), accent=(255, 59, 48),
+        accent2=(255, 197, 61), accent3=(179, 136, 255),
+        fam_display="space", fam_ui="inter", fam_mono="mono",
+        handle="@apex", next_teaser="La próxima: la parada en boxes que batió el récord",
+        chord=(110.0, 138.59, 164.81), bpm=132,
+        notes="Asfalto y cronómetro. Rojo de sector, ámbar de bandera, mono para los tiempos.",
+    ),
     "cenit": Brand(
         key="cenit", name="CENIT", tagline="El cielo, explicado",
         niche="Astronomía", audience="18–40, ciencia y noches largas",

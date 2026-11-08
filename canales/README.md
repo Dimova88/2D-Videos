@@ -1,8 +1,14 @@
-# Cuatro pilotos de marca · 30 s cada uno
+# Cinco pilotos de marca · 30 s cada uno
 
-Cuatro canales candidatos, cuatro marcas personales completas y un vídeo de 30 s por
-marca con voz sincronizada con la animación. Mismo motor, cuatro identidades visuales
-que no se parecen en nada.
+Cinco canales candidatos, cinco marcas personales completas y un vídeo de 30 s por
+marca. Mismo motor, cinco identidades visuales que no se parecen en nada.
+
+> **v3 (esta entrega).** Los cinco vídeos se han rehecho para que no parezcan
+> diapositivas: capa de mundo que se mueve durante toda la pieza, objetos de nicho en
+> lugar de solo gráficos (globo, monedas, aerogeneradores, diafragma, semáforo,
+> neumáticos, cronómetro), tipografía cinética y **efectos de sonido sintetizados**
+> sincronizados con cada animación. Nueva marca: **APEX · Fórmula 1**.
+> Lista de fallos revisados: **`CHECKLIST.md`**.
 
 ## Entregables
 
@@ -13,16 +19,18 @@ que no se parecen en nada.
 | 03 UMBRAL | `out/umbral_30s.mp4` | `out/umbral_portada.png` | `out/hoja_umbral.png` |
 | 04 CENIT | `out/cenit_30s.mp4` | `out/cenit_portada.png` | `out/hoja_cenit.png` |
 
-**Mismo guion, renderizado dos veces**: cada pieza existe en dos motores, con el mismo
-audio y los mismos cortes. `_30s.mp4` = Python + Pillow; `_hf.mp4` = HTML + GSAP con
-HyperFrames (ver `hyperframes/README.md`, con tiempos y diferencias medidas).
+**Dos motores, dos generaciones.** `_30s.mp4` = Python + Pillow (tareas 1–6, se
+conservan como referencia). `_hf.mp4` = HTML + GSAP con HyperFrames, la versión viva:
+mundo animado, objetos de nicho, tipografía cinética y efectos de sonido
+(ver `hyperframes/README.md` y `hyperframes/ESTILO.md`).
 
-| Canal | Python | HyperFrames |
+| Canal | Python (v1) | HyperFrames (v3, con efectos) |
 |---|---|---|
 | MERIDIANO | `out/meridiano_30s.mp4` | `out/meridiano_hf.mp4` · `out/hf_meridiano.png` |
 | CIFRA | `out/cifra_30s.mp4` | `out/cifra_hf.mp4` · `out/hf_cifra.png` |
 | UMBRAL | `out/umbral_30s.mp4` | `out/umbral_hf.mp4` · `out/hf_umbral.png` |
 | CENIT | `out/cenit_30s.mp4` | `out/cenit_hf.mp4` · `out/hf_cenit.png` |
+| **APEX** | — | `out/apex_hf.mp4` · `out/hf_apex.png` |
 
 Comparativa de las cuatro portadas: `out/portadas.png`.
 Fotogramas de los 4×5 planos: `out/hoja_contactos.png`.
@@ -34,6 +42,20 @@ Auditoría de empaquetado (lo único medible sin publicar): **`AUDITORIA.md`**,
 `out/auditoria.png` y `out/auditoria.json`.
 
 Comparativa de nichos — vida longeva frente a rendimiento en YouTube: **`NICHOS.md`**.
+Lista de fallos que ya han aparecido y comprobaciones antes de entregar: **`CHECKLIST.md`**.
+
+| Pieza | Duración | Cortes/min | Plano mediano | Movimiento en plano |
+|---|---|---|---|---|
+| MERIDIANO | 30,0 s | 12,0 | 3,1 s | 0,090 |
+| CIFRA | 29,7 s | 10,1 | 4,95 s | 0,105 |
+| UMBRAL | 30,7 s | 9,8 | 4,65 s | 0,077 |
+| CENIT | 29,7 s | 12,1 | 2,7 s | 0,062 |
+| APEX | 30,0 s | 12,0 | 1,9 s | 0,092 |
+
+Audio medido con `python src/audiocheck.py`: 48 kHz, AAC, −14,2 a −15,4 LUFS, pico
+≤ −0,7 dBFS, y los 16 efectos de animación de cada pieza por encima de −26 dBFS.
+El chef de la mezcla (voz + música + efectos) es `src/sfx.py`; el volcado final, con
+`loudnorm` en dos pasadas, `hyperframes/mux.sh`.
 
 Motion pass v2 — cómo se copió el lenguaje visual de un vídeo de referencia con
 Agent Reach, la skill `watch` y yt-dlp, y qué no se pudo hacer: **`hyperframes/ESTILO.md`**.
@@ -48,6 +70,9 @@ Agent Reach, la skill `watch` y yt-dlp, y qué no se pudo hacer: **`hyperframes/
   verde y ámbar, tarjetas con sombra. Didáctica y apta para cualquier anunciante.
 - **CENIT** · *El cielo, explicado* — serif espaciada, violeta y oro sobre noche, 8.777
   estrellas reales. Silencio y escala.
+- **APEX** · *La carrera, en datos* — Fórmula 1 sin imágenes de carrera: semáforo,
+  cronómetro, neumáticos, trazado y récords verificados. Space Grotesk, rojo de sector
+  y ámbar de bandera.
 
 ## Estructura de cada vídeo (5 planos)
 
@@ -78,7 +103,11 @@ python src/build.py                    # los cuatro canales
 python src/build.py umbral cenit       # solo dos
 python src/audit.py                    # tabla de empaquetado de las 4 piezas
 python src/sheets.py                   # hojas de contactos
-cd hyperframes && npm install && ./render.sh   # las cuatro piezas, en HTML + GSAP
+python src/cues.py                     # cues de imagen + audio
+python src/sfx.py                      # voz + música + efectos -> build/*_audio.wav
+cd hyperframes && npm install
+python make_comps.py                   # los cinco HTML, desde timings.js
+./render.sh                            # las cinco piezas, en HTML + GSAP
 python tools/style_ref.py out/cenit_hf.mp4     # mide el ritmo del resultado
 ```
 

@@ -1,18 +1,18 @@
-# Cuatro marcas personales para cuatro canales candidatos
+# Cinco marcas personales para cinco canales candidatos
 
 Cada canal es una **marca cerrada**: nombre, promesa, paleta, tipografías, logotipo,
 lenguaje de animación, tono de voz y reglas de miniatura. Nada se comparte entre
 ellas salvo la disciplina de producción.
 
-| | 01 MERIDIANO | 02 CIFRA | 03 UMBRAL | 04 CENIT |
-|---|---|---|---|---|
-| Nicho | Geopolítica y demografía | Economía y datos de país | Energía y clima | Astronomía |
-| Promesa | El mundo, medido | La economía, en un dato | La transición, en datos | El cielo, explicado |
-| Público | 25–44 · curiosos de mapas | 28–50 · profesionales | 30–55 · técnicos, docentes | 18–40 · ciencia |
-| Pieza | `out/meridiano_30s.mp4` | `out/cifra_30s.mp4` | `out/umbral_30s.mp4` | `out/cenit_30s.mp4` |
-| Duración | 30,0 s | 29,7 s | 30,7 s | 29,7 s |
-| Fondo | cálido oscuro | frío oscuro | **claro** | nocturno |
-| Emoción | asombro tranquilo | tensión competitiva | optimismo sobrio | silencio y escala |
+| | 01 MERIDIANO | 02 CIFRA | 03 UMBRAL | 04 CENIT | 05 APEX |
+|---|---|---|---|---|---|
+| Nicho | Geopolítica y demografía | Economía y datos de país | Energía y clima | Astronomía | Fórmula 1 |
+| Promesa | El mundo, medido | La economía, en un dato | La transición, en datos | El cielo, explicado | La carrera, en datos |
+| Público | 25–44 · curiosos de mapas | 28–50 · profesionales | 30–55 · técnicos, docentes | 18–40 · ciencia | 20–45 · motor y datos |
+| Pieza | `out/meridiano_hf.mp4` | `out/cifra_hf.mp4` | `out/umbral_hf.mp4` | `out/cenit_hf.mp4` | `out/apex_hf.mp4` |
+| Duración | 30,0 s | 29,7 s | 30,7 s | 29,7 s | 30,0 s |
+| Fondo | cálido oscuro | frío oscuro | **claro** | nocturno | asfalto |
+| Emoción | asombro tranquilo | tensión competitiva | optimismo sobrio | silencio y escala | adrenalina medida |
 
 ---
 
@@ -159,7 +159,60 @@ cuatro palabras en serif.
 
 ---
 
-## Cómo se producen los cuatro desde el mismo motor
+## 05 · APEX — *La carrera, en datos*
+
+**Quién.** Alguien que ve las carreras con el cronómetro en la mano y explica por qué
+1,80 s es una obra de ingeniería. Ni hype ni tertulia: el dato y el gesto.
+
+**Por qué se queda.** La Fórmula 1 es el único nicho de esta lista donde el número
+*récord* es la historia. Cada semana hay uno nuevo que contar.
+
+**Paleta**
+
+| Rol | Hex | Uso |
+|---|---|---|
+| Asfalto | `#0B0C0E` | fondo |
+| Asfalto alto | `#15171C` | degradado |
+| Rojo sector | `#FF3B30` | acento principal, récords |
+| Ámbar bandera | `#FFC53D` | sectores, tiempos |
+| Violeta telemetría | `#B388FF` | datos secundarios |
+| Blanco pizarra | `#F4F4F2` | titulares |
+| Gris ferralla | `#8A9099` | texto secundario |
+
+**Tipografías.** **Space Grotesk 700** para cifras y titulares (esquinas rectas, aire de
+panel de tiempos) e **Inter** para el cuerpo. **JetBrains Mono** para cronómetros.
+
+**Logotipo.** Curva de circuito con una flecha de sector: la chicane que define una
+vuelta. Wordmark en Space Grotesk con tracking cerrado.
+
+**Animación específica del nicho.** Es la única marca con motor propio:
+semáforo de salida de cinco luces que se encienden en secuencia y se apagan a la vez,
+cronómetro que corre hasta 1,80 s, cuatro neumáticos que caen sobre la mesa de boxes,
+trazado que se dibuja con un coche recorriéndolo, velocímetro hasta 372,6 km/h, tres
+sectores que se encienden y banderas a cuadros que barren el plano. Además, el único
+sonido de motor del proyecto (`src/sfx.py`, función `rev`).
+
+**Datos y fuentes** (`hyperframes/assets/data/apex.js`)
+
+| Dato | Valor | Fuente |
+|---|---|---|
+| Parada en boxes más rápida | 1,80 s · McLaren, Norris, Lusail, 08/10/2023 | Guinness World Records |
+| Récord anterior | 1,82 s · Red Bull, Verstappen, Brasil 2019 | Guinness / F1 |
+| Velocidad punta en carrera | 372,6 km/h · Montoya, Monza, 2005 | Motor Sport / F1 |
+| Monza | 5,793 km · 11 curvas | F1 |
+| Margen de victoria más pequeño | 0,010 s · Gethin–Peterson, Monza 1971 | List of F1 race records |
+| Grandes Premios 2024 | 24 | F1 |
+
+**Voz y tono.** Frases cortas, cifra primero. «Cuatro ruedas, veinte personas, dos
+segundos.» (El guion completo está al final de este documento; **la pieza se entrega sin
+locución**: ver `CHECKLIST.md` §6.)
+
+**Miniatura.** Asfalto, una cifra enorme en Space Grotesk y una banda a cuadros
+ocupando el borde inferior.
+
+---
+
+## Cómo se producen los cinco desde el mismo motor
 
 `src/prep.py` de `pilotos/` genera los datos reales (Natural Earth, Our World in Data,
 Banco Mundial, Yale BSC5). `src/brandlib.py` define las cuatro marcas como un `Brand`
@@ -176,6 +229,14 @@ locutar, los cortes se recalculan solos.
 python src/build.py              # los cuatro
 python src/build.py cifra umbral # solo algunos
 ```
+
+## Guion de APEX (30 s, sin locución todavía)
+
+1. *Firma* — «Fórmula 1, en datos. La carrera, en datos.»
+2. *El récord* — «Cuatro ruedas, veinte personas, dos segundos.»
+3. *El trazado* — «Monza, 2005: 372,6 kilómetros por hora en carrera.»
+4. *La frase* — «No va de velocidad. Va de precisión.»
+5. *Cierre* — «Una carrera. Un dato. Cada semana.»
 
 ## Lo que hay que decidir
 

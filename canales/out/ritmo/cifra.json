@@ -5,46 +5,53 @@
  "height": 1080,
  "fps": 30.0,
  "duration_s": 29.7,
- "shots": 5,
+ "shots": 6,
  "cut_threshold": "adaptativo (4× mediana / p96)",
- "shot_mean_s": 5.94,
- "shot_median_s": 5.5,
- "cuts_per_min": 8.1,
- "motion_in_shot": 0.041,
+ "shot_mean_s": 4.95,
+ "shot_median_s": 4.95,
+ "cuts_per_min": 10.1,
+ "motion_in_shot": 0.1047,
  "frames": [
   {
-   "t": 1.44,
-   "lum": 0.0606,
-   "contrast": 0.0444,
-   "sat": 0.5452,
+   "t": 1.38,
+   "lum": 0.0679,
+   "contrast": 0.0539,
+   "sat": 0.5436,
    "caption_mass": 0.0
   },
   {
-   "t": 6.6,
-   "lum": 0.0691,
-   "contrast": 0.0794,
-   "sat": 0.5455,
+   "t": 6.56,
+   "lum": 0.0825,
+   "contrast": 0.1235,
+   "sat": 0.5349,
    "caption_mass": 0.0
   },
   {
-   "t": 12.7,
-   "lum": 0.0741,
-   "contrast": 0.0876,
-   "sat": 0.5444,
+   "t": 13.0,
+   "lum": 0.075,
+   "contrast": 0.0892,
+   "sat": 0.5424,
    "caption_mass": 0.0
   },
   {
-   "t": 18.02,
-   "lum": 0.071,
-   "contrast": 0.0893,
-   "sat": 0.5509,
+   "t": 15.88,
+   "lum": 0.0897,
+   "contrast": 0.1489,
+   "sat": 0.5445,
+   "caption_mass": 0.0
+  },
+  {
+   "t": 18.54,
+   "lum": 0.0916,
+   "contrast": 0.151,
+   "sat": 0.5419,
    "caption_mass": 0.0
   },
   {
    "t": 25.86,
    "lum": 0.0723,
-   "contrast": 0.088,
-   "sat": 0.5437,
+   "contrast": 0.0784,
+   "sat": 0.5366,
    "caption_mass": 0.0
   }
  ],
