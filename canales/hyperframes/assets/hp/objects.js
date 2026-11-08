@@ -57,33 +57,6 @@ function globe(S, { x, y, r = 260, at = 0.2, tint, core = true } = {}) {
 }
 
 /* Arco de vuelo: trazo discontinuo que se dibuja y un punto que lo recorre. */
-function flightArc(S, { x, y, w = 900, hh = 420, at = 0.3, dash = 8 } = {}) {
-  const H = hh;
-  const d = `M 20 ${H - 40} Q ${w * 0.45} ${-40} ${w - 30} ${H - 120}`;
-  const el = place(h("div"), x, y, w, H);
-  el.innerHTML = `<svg viewBox="0 0 ${w} ${H}" width="${w}" height="${H}">
-    <path class="p" d="${d}" fill="none" stroke="var(--accent2)" stroke-width="2"
-      stroke-dasharray="${dash} ${dash + 6}" stroke-linecap="round" opacity=".85"/>
-    <circle class="dot" r="6" fill="var(--accent)"/></svg>`;
-  S.sec.appendChild(el);
-  const p = el.querySelector(".p"), dot = el.querySelector(".dot");
-  const len = p.getTotalLength();
-  p.style.strokeDasharray = `${dash} ${dash + 6}`;
-  p.style.strokeDashoffset = "0";
-  const tl = S.tl;
-  tl.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.4 }, S.start + at);
-  tl.fromTo(p, { strokeDashoffset: len * 1.4 }, { strokeDashoffset: 0, duration: 2.4, ease: "power1.inOut" }, S.start + at);
-  const prog = { v: 0 };
-  tl.to(prog, {
-    v: 1, duration: 2.4, ease: "power1.inOut", onUpdate: () => {
-      const pt = p.getPointAtLength(len * prog.v);
-      dot.setAttribute("cx", pt.x); dot.setAttribute("cy", pt.y);
-      dot.setAttribute("opacity", prog.v > 0.02 ? 1 : 0);
-    },
-  }, S.start + at);
-  tl.to(el, { opacity: 0, duration: 0.5 }, S.start + at + 2.9);
-  return el;
-}
 
 /* Chincheta de mapa que cae sobre el punto y suelta una onda. */
 function pin(S, { x, y, at = 0.5, label, w = 260 } = {}) {
@@ -111,20 +84,6 @@ function pin(S, { x, y, at = 0.5, label, w = 260 } = {}) {
 }
 
 /* Sello de pasaporte: cae con golpe, gira un grado y suelta polvo. */
-function stamp(S, { x, y, text = "ENTRADA", sub = "8 PAÍSES", at = 0.6, rot = -8 } = {}) {
-  const el = place(h("div", "seal"), x, y);
-  el.style.borderRadius = "10px";
-  el.style.padding = "20px 34px";
-  el.innerHTML = `<span style="font-size:34px;letter-spacing:.10em">${text}</span>
-    <span style="font:600 14px/1 var(--f-mono);letter-spacing:.3em;opacity:.8">${sub}</span>`;
-  el.style.transformOrigin = "50% 50%";
-  S.sec.appendChild(el);
-  const tl = S.tl, t = S.start + at;
-  tl.fromTo(el, { opacity: 0, scale: 2.6, rotate: rot - 14 },
-    { opacity: 1, scale: 1, rotate: rot, duration: 0.34, ease: "power4.in" }, t);
-  tl.fromTo(el, { scale: 1 }, { scale: 1.04, duration: 0.08, yoyo: true, repeat: 1 }, t + 0.34);
-  return el;
-}
 
 /* ================================================================ CIFRA */
 /* Moneda que gira sobre su eje: escala horizontal + canto que aparece. */
@@ -193,41 +152,6 @@ function turbine(S, { x, y, s = 1, at = 0.4 } = {}) {
 }
 
 /* Aguja de reloj/medidor: arco de 240° con valor. */
-function gauge(S, { x, y, r = 190, at = 0.4, from = 0, to = 100, label = "", max = 100 } = {}) {
-  const el = place(h("div"), x - r - 20, y - r - 20, (r + 20) * 2, (r + 20) * 2);
-  const cx = r + 20, cy = r + 20;
-  const arc = (a0, a1, rad) => {
-    const p = (a) => [cx + rad * Math.cos((a - 90) * Math.PI / 180), cy + rad * Math.sin((a - 90) * Math.PI / 180)];
-    const A = p(a0), B = p(a1);
-    return `M ${A[0]} ${A[1]} A ${rad} ${rad} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${B[0]} ${B[1]}`;
-  };
-  const ticks = Array.from({ length: 11 }, (_, i) => {
-    const a = -120 + i * 24;
-    const R = r - 22, r0 = cx + R * Math.cos((a - 90) * Math.PI / 180), r1 = cx + (R - 12) * Math.cos((a - 90) * Math.PI / 180);
-    const z0 = cy + R * Math.sin((a - 90) * Math.PI / 180), z1 = cy + (R - 12) * Math.sin((a - 90) * Math.PI / 180);
-    return `<line x1="${r0}" y1="${z0}" x2="${r1}" y2="${z1}" stroke="var(--ink)" stroke-opacity=".25" stroke-width="2"/>`;
-  }).join("");
-  el.innerHTML = `<svg viewBox="0 0 ${cx * 2} ${cy * 2}" width="${cx * 2}" height="${cy * 2}">
-    <path d="${arc(-120, 120, r)}" fill="none" stroke="var(--ink)" stroke-opacity=".14" stroke-width="10" stroke-linecap="round"/>
-    <path class="fill" d="${arc(-120, 120, r)}" fill="none" stroke="var(--accent)" stroke-width="10"
-      stroke-linecap="round" stroke-dasharray="0 9999"/>
-    ${ticks}
-    <g class="needle" style="transform-origin:${cx}px ${cy}px">
-      <line x1="${cx}" y1="${cy}" x2="${cx}" y2="${cy - r + 34}" stroke="var(--accent2)" stroke-width="6" stroke-linecap="round"/>
-    </g>
-    <circle cx="${cx}" cy="${cy}" r="9" fill="var(--accent2)"/>
-    ${label ? `<text x="${cx}" y="${cy + 56}" text-anchor="middle" font-family="JetBrainsMono, monospace"
-      font-size="17" letter-spacing="4" fill="var(--dim)">${label}</text>` : ""}</svg>`;
-  S.sec.appendChild(el);
-  const tl = S.tl, t = S.start + at;
-  tl.fromTo(el, { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.7, ease: "power3.out" }, t);
-  const fill = el.querySelector(".fill"), len = 2 * Math.PI * r * (240 / 360);
-  fill.style.strokeDasharray = `0 ${len}`;
-  const frac = clamp((to - 0) / (max - 0), 0, 1);
-  tl.to(fill, { strokeDasharray: `${len * frac} ${len}`, duration: 1.4, ease: "power2.out" }, t + 0.3);
-  tl.fromTo(el.querySelector(".needle"), { rotate: -120 }, { rotate: -120 + 240 * frac, duration: 1.4, ease: "power2.out" }, t + 0.3);
-  return el;
-}
 
 /* Interruptor: se apaga lo viejo, se enciende lo nuevo. */
 function toggleSwitch(S, { x, y, at = 0.5, left = "CARBÓN", right = "VIENTO" } = {}) {
@@ -235,10 +159,20 @@ function toggleSwitch(S, { x, y, at = 0.5, left = "CARBÓN", right = "VIENTO" } 
   el.style.borderRadius = "999px";
   el.style.background = "color-mix(in srgb, var(--ink) 8%, transparent)";
   el.style.border = "1px solid color-mix(in srgb, var(--ink) 18%, transparent)";
-  el.innerHTML = `<div style="position:absolute;inset:6px;display:flex;align-items:center;justify-content:space-between;
-      padding:0 26px;font:700 17px/1 var(--f-mono);letter-spacing:.16em;color:var(--dim)">${left}${right}</div>
-    <div class="knob" style="position:absolute;left:6px;top:6px;width:222px;height:80px;border-radius:999px;
-      background:var(--accent);box-shadow:0 8px 22px rgba(0,0,0,.25)"></div>`;
+  /* Las etiquetas van FUERA de la pastilla: dentro, la bolita verde tapaba
+     "CARBÓN" y el texto en --dim no se leía sobre el papel de UMBRAL
+     (fallo V27 del CHECKLIST). */
+  el.style.height = "140px";
+  el.style.background = "transparent";
+  el.style.border = "0";
+  el.innerHTML = `<div style="position:absolute;left:0;top:0;display:flex;justify-content:space-between;
+      width:460px;font:700 17px/1 var(--f-mono);letter-spacing:.16em;color:var(--ink);opacity:.55">
+      <span>${left}</span><span>${right}</span></div>
+    <div style="position:absolute;left:0;top:48px;width:460px;height:92px;border-radius:999px;
+      background:color-mix(in srgb, var(--ink) 8%, transparent);
+      border:1px solid color-mix(in srgb, var(--ink) 20%, transparent)"></div>
+    <div class="knob" style="position:absolute;left:6px;top:54px;width:222px;height:80px;border-radius:999px;
+      background:var(--accent);box-shadow:0 8px 22px rgba(0,0,0,.18)"></div>`;
   S.sec.appendChild(el);
   const tl = S.tl, t = S.start + at;
   tl.fromTo(el, { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.5 }, t);
@@ -280,7 +214,10 @@ function iris(S, { x, y, r = 210, at = 0.3 } = {}) {
   const el = place(h("div"), x - r, y - r, r * 2, r * 2);
   const blades = Array.from({ length: 6 }, (_, i) => {
     const a = i * 60;
-    return `<path class="blade" d="M${r} ${r} L${r + r * 1.05} ${r - r * 0.42} L${r + r * 1.05} ${r + r * 0.42} Z"
+    /* Las aspas llegan a 0,92r: a 1,05r se salían del viewBox y el SVG las
+       recortaba, así que el diafragma se veía como triángulos partidos en el
+       borde (fallo V26 del CHECKLIST). */
+    return `<path class="blade" d="M${r} ${r} L${r + r * 0.92} ${r - r * 0.40} L${r + r * 0.92} ${r + r * 0.40} Z"
       fill="var(--bg2)" stroke="var(--accent)" stroke-opacity=".45" stroke-width="2"
       transform="rotate(${a} ${r} ${r})"/>`;
   }).join("");
@@ -298,20 +235,6 @@ function iris(S, { x, y, r = 210, at = 0.3 } = {}) {
 }
 
 /* Cometa: cabeza, cola y estela que cruza el plano. */
-function comet(S, { at = 1.2, y = 300 } = {}) {
-  const el = place(h("div"), -400, y, 560, 200);
-  el.innerHTML = `<svg viewBox="0 0 560 200" width="560" height="200">
-    <defs><linearGradient id="ct" x1="0" x2="1"><stop offset="0" stop-color="var(--accent3)" stop-opacity="0"/>
-      <stop offset="1" stop-color="var(--accent3)" stop-opacity=".9"/></linearGradient></defs>
-    <path d="M40 130 Q 260 60 430 92" stroke="url(#ct)" stroke-width="7" fill="none" stroke-linecap="round"/>
-    <circle cx="440" cy="92" r="11" fill="var(--accent2)"/>
-    <circle cx="440" cy="92" r="20" fill="var(--accent2)" fill-opacity=".18"/></svg>`;
-  S.sec.appendChild(el);
-  const tl = S.tl, t = S.start + at;
-  tl.fromTo(el, { x: -300, opacity: 0 }, { x: 1900, opacity: 1, duration: 1.9, ease: "power1.in" }, t);
-  tl.to(el, { opacity: 0, duration: 0.3 }, t + 1.8);
-  return el;
-}
 
 /* Constelación: puntos y líneas que se dibujan. */
 function constellation(S, { at = 0.4, x = 1080, y = 300, scale = 1 } = {}) {
@@ -437,7 +360,43 @@ function circuit(S, { x = 700, y = 190, w = 900, hgt = 620, at = 0.2 } = {}) {
   return el;
 }
 
-/* Velocímetro de velocidad punta. */
+function gauge(S, { x, y, r = 190, at = 0.4, from = 0, to = 100, label = "", max = 100 } = {}) {
+  const el = place(h("div"), x - r - 20, y - r - 20, (r + 20) * 2, (r + 20) * 2);
+  const cx = r + 20, cy = r + 20;
+  const arc = (a0, a1, rad) => {
+    const p = (a) => [cx + rad * Math.cos((a - 90) * Math.PI / 180), cy + rad * Math.sin((a - 90) * Math.PI / 180)];
+    const A = p(a0), B = p(a1);
+    return `M ${A[0]} ${A[1]} A ${rad} ${rad} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${B[0]} ${B[1]}`;
+  };
+  const ticks = Array.from({ length: 11 }, (_, i) => {
+    const a = -120 + i * 24;
+    const R = r - 22, r0 = cx + R * Math.cos((a - 90) * Math.PI / 180), r1 = cx + (R - 12) * Math.cos((a - 90) * Math.PI / 180);
+    const z0 = cy + R * Math.sin((a - 90) * Math.PI / 180), z1 = cy + (R - 12) * Math.sin((a - 90) * Math.PI / 180);
+    return `<line x1="${r0}" y1="${z0}" x2="${r1}" y2="${z1}" stroke="var(--ink)" stroke-opacity=".25" stroke-width="2"/>`;
+  }).join("");
+  el.innerHTML = `<svg viewBox="0 0 ${cx * 2} ${cy * 2}" width="${cx * 2}" height="${cy * 2}">
+    <path d="${arc(-120, 120, r)}" fill="none" stroke="var(--ink)" stroke-opacity=".14" stroke-width="10" stroke-linecap="round"/>
+    <path class="fill" d="${arc(-120, 120, r)}" fill="none" stroke="var(--accent)" stroke-width="10"
+      stroke-linecap="round" stroke-dasharray="0 9999"/>
+    ${ticks}
+    <g class="needle" style="transform-origin:${cx}px ${cy}px">
+      <line x1="${cx}" y1="${cy}" x2="${cx}" y2="${cy - r + 34}" stroke="var(--accent2)" stroke-width="6" stroke-linecap="round"/>
+    </g>
+    <circle cx="${cx}" cy="${cy}" r="9" fill="var(--accent2)"/>
+    ${label ? `<text x="${cx}" y="${cy + 56}" text-anchor="middle" font-family="JetBrainsMono, monospace"
+      font-size="17" letter-spacing="4" fill="var(--dim)">${label}</text>` : ""}</svg>`;
+  S.sec.appendChild(el);
+  const tl = S.tl, t = S.start + at;
+  tl.fromTo(el, { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.7, ease: "power3.out" }, t);
+  const fill = el.querySelector(".fill"), len = 2 * Math.PI * r * (240 / 360);
+  fill.style.strokeDasharray = `0 ${len}`;
+  const frac = clamp((to - 0) / (max - 0), 0, 1);
+  tl.to(fill, { strokeDasharray: `${len * frac} ${len}`, duration: 1.4, ease: "power2.out" }, t + 0.3);
+  tl.fromTo(el.querySelector(".needle"), { rotate: -120 }, { rotate: -120 + 240 * frac, duration: 1.4, ease: "power2.out" }, t + 0.3);
+  return el;
+}
+
+/* Velocímetro de velocidad punta: la aguja con la etiqueta KM/H. */
 function speedo(S, { x, y, r = 190, at = 0.4, to = 372.6, max = 400 } = {}) {
   return gauge(S, { x, y, r, at, to, max, label: "KM/H" });
 }
@@ -457,21 +416,4 @@ function checker(S, { x = 0, y = 940, w = 1920, hh = 54, at = 0.3, dir = 1 } = {
   return el;
 }
 
-/* Tres sectores que se encienden en orden. */
-function sectors(S, { x, y, at = 0.5, w = 116 } = {}) {
-  const el = place(h("div"), x, y, w * 3 + 24, 44);
-  el.style.display = "flex";
-  el.style.gap = "12px";
-  el.innerHTML = ["S1", "S2", "S3"].map((s) => `<div class="sec" style="flex:1;height:44px;border-radius:6px;
-    background:color-mix(in srgb, var(--ink) 10%, transparent);border:1px solid color-mix(in srgb, var(--ink) 16%, transparent);
-    display:grid;place-items:center;font:700 15px/1 var(--f-mono);letter-spacing:.18em;color:var(--dim)">${s}</div>`).join("");
-  S.sec.appendChild(el);
-  const tl = S.tl, t = S.start + at;
-  tl.fromTo(el, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.4 }, t);
-  el.querySelectorAll(".sec").forEach((s, i) => {
-    tl.to(s, { backgroundColor: i === 2 ? "var(--accent3)" : "var(--accent2)",
-      color: "#0b0c0e", duration: 0.18 }, t + 0.4 + i * 0.34);
-  });
-  return el;
-}
 

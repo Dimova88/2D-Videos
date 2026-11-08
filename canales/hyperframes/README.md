@@ -89,10 +89,11 @@ estructurales:
    velocímetro, sectores y bandera a cuadros**.
 3. **Tipografía cinética** (`kin()`): cada palabra en su máscara, entrando desde abajo,
    con el subrayado de marcador cayendo en el acento.
-4. **Efectos de sonido** (`src/sfx.py`): 16 por pieza, sintetizados con numpy, en los
-   mismos tiempos que animan la imagen (`src/cues.py` → `assets/data/cues.js`).
-   Barridos en los cortes, golpes en las frases, rebotes en las pegatinas, dos clics
-   en el botón. APEX añade el único sonido de motor del proyecto.
+4. **Audio de YouTube** (`src/mix.py`): locución más una cama musical sintetizada,
+   sin percusión, 12 dB por debajo de la voz y con *ducking*. **Sin efectos de
+   sonido**: la v3 tenía 16 por pieza (`src/sfx.py`, hoy eliminado) y sonaban a
+   plantilla. La cama se puede generar a cualquier duración para el formato largo
+   (`python src/mix.py --bed 480 <marca>`).
 5. **Composiciones generadas**: `make_comps.py` escribe los cinco HTML desde
    `timings.js`. Antes eran cinco archivos copiados a mano.
 

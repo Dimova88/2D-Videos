@@ -2,7 +2,9 @@
    Gramática común: nada aparece y se queda quieto. Cada plano tiene un objeto de
    nicho que se mueve, tipografía que entra por máscara y al menos un elemento que
    sigue derivando cuando todo lo demás ha llegado. Los acentos caen en los mismos
-   tiempos que los sonidos (assets/data/cues.js), así que imagen y audio van juntos.
+   tiempos que los cortes de `timings.js`, y la música de `src/mix.py` se apoya en
+   esos mismos tiempos. La v3 tenía un cue por cada efecto de sonido; los efectos
+   se han eliminado (sonaban a plantilla) y con ellos la capa de cues.
 
    Cada plano es {html, anim, render}:
      html(S)   construye el DOM (los objetos se animan solos con S.tl)
@@ -10,6 +12,12 @@
      render(t) dibuja canvas / recorridos por fotograma
 */
 
+/* Presupuesto de densidad (regla que salió de la revisión de la v3).
+   Por plano: un titular, un objeto del nicho como protagonista y, como mucho,
+   UNA etiqueta de dato. Todo lo demás (sellos, pegatinas, anillos, cintas,
+   arcos decorativos, agujas que repiten la misma cifra) se ha eliminado: no
+   aportaba información y competía por la mirada. Si un elemento no cambia lo
+   que el espectador entiende, no entra. */
 const PAD = 96;
 
 /* --------------------------------------------------------------- tipografía */
@@ -140,23 +148,6 @@ function brandLock(S, { x = PAD, y = 120, size = 96, horiz = true, tag = true } 
 }
 
 /* Cinta de cotizaciones: cruza el borde inferior sin parar. */
-function ticker(S, y = 1000) {
-  const b = S.b;
-  const wrap = h("div");
-  Object.assign(wrap.style, { position: "absolute", left: "0", right: "0", top: y + "px", height: "44px",
-    overflow: "hidden", borderTop: "1px solid color-mix(in srgb, var(--ink) 14%, transparent)",
-    borderBottom: "1px solid color-mix(in srgb, var(--ink) 14%, transparent)" });
-  const track = h("div");
-  Object.assign(track.style, { display: "flex", whiteSpace: "nowrap", willChange: "transform" });
-  const items = ["PIB +4,6 %", "INFLACIÓN 3,1 %", "TIPOS 4,25 %", "PARO 11,2 %", "DEUDA 105 %",
-    "EXPORT +2,8 %", "SALARIO +5,4 %", "AHORRO 7,1 %"];
-  track.innerHTML = [...items, ...items, ...items].map((t) =>
-    `<span style="width:300px;flex:none;font:500 17px/44px var(--f-mono);color:var(--ink);opacity:.45">${t}</span>`).join("");
-  wrap.appendChild(track);
-  S.sec.appendChild(wrap);
-  S.tl.fromTo(track, { x: 0 }, { x: -300 * items.length, duration: Math.max(S.dur, 4), ease: "none" }, S.start);
-  return wrap;
-}
 
 /* ================================================================ MERIDIANO */
 const MERIDIANO = [
@@ -164,14 +155,12 @@ const MERIDIANO = [
     html(S) {
       const b = S.b;
       globe(S, { x: 1520, y: 470, r: 330, at: 0.05 });
-      flightArc(S, { x: 120, y: 300, w: 900, h: 420, at: 0.6 });
       S.k = kin(S, "El mundo, medido", { x: PAD, y: 620, size: 44, color: b.accent, weight: 400, max: 900 });
       S.lock = brandLock(S, { x: PAD, y: 220, size: 110, tag: false });
       const rule = h("div");
       Object.assign(rule.style, { position: "absolute", left: PAD + "px", top: "716px", width: "520px", height: "1.5px", background: b.ink, opacity: ".22" });
       S.sec.appendChild(rule);
       S.tl.fromTo(rule, { scaleX: 0, transformOrigin: "0% 50%" }, { scaleX: 1, duration: 0.9, ease: "power3.out" }, S.start + 1.05);
-      mono(S, "GEOPOLÍTICA · UN MAPA CADA SEMANA", { x: PAD, y: 800, size: 14, at: 1.1 });
     },
     anim(tl, S) { kinIn(tl, S.k, S.start + 1.15, { stagger: 0.09 }); },
   },
@@ -185,13 +174,11 @@ const MERIDIANO = [
       ring.innerHTML = `<svg viewBox="0 0 520 520" width="520" height="520">
         <circle class="r1" cx="260" cy="260" r="238" fill="none" stroke="var(--accent)" stroke-opacity=".35"
           stroke-width="1.5" stroke-dasharray="3 9"/>
-        <circle class="r2" cx="260" cy="260" r="196" fill="none" stroke="var(--accent2)" stroke-opacity=".22" stroke-width="1"/></svg>`;
+        </svg>`;
       S.sec.appendChild(ring);
       S.tl.fromTo(ring.querySelectorAll("circle"), { scale: 0.7, opacity: 0, transformOrigin: "50% 50%" },
         { scale: 1, opacity: 1, duration: 0.9, stagger: 0.1 }, S.start + 0.45);
       S.tl.to(ring, { rotate: 360, duration: 26, repeat: -1, ease: "none" }, S.start);
-      stamp(S, { x: 1120, y: 790, text: "8 PAÍSES", sub: "4.368 M PERSONAS", at: 1.7, rot: -7 });
-      chip(S, { x: PAD, y: 560, text: "4.368 M", sub: "personas", at: 1.5 });
     },
     anim(tl, S) {
       kinIn(tl, S.h, S.start + 0.15);
@@ -212,16 +199,6 @@ const MERIDIANO = [
       mono(S, "MILLONES DE PERSONAS", { x: 1502, y: 232, size: 13, at: 0.5 });
       S.big = big;
       S.arcs = [];
-      const legs = [[600, 380], [1180, 300], [1420, 520]];
-      legs.forEach(([x, y], i) => {
-        const a = h("div");
-        Object.assign(a.style, { position: "absolute", left: x + "px", top: y + "px" });
-        a.innerHTML = `<svg width="360" height="180" viewBox="0 0 360 180">
-          <path d="M0 160 Q 180 -10 350 60" fill="none" stroke="var(--accent2)" stroke-width="1.6"
-            stroke-dasharray="5 6" stroke-opacity=".55"/></svg>`;
-        S.sec.appendChild(a);
-        S.tl.fromTo(a, { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.8 }, S.start + 0.6 + i * 0.25);
-      });
       S.list = ["India", "China", "EE. UU.", "Indonesia", "Pakistán", "Nigeria", "Brasil", "Bangladés"].map((n, i) => {
         const row = h("div", "row");
         Object.assign(row.style, { position: "absolute", left: "120px", top: (700 + i * 38) + "px",
@@ -230,7 +207,6 @@ const MERIDIANO = [
         S.sec.appendChild(row);
         return row;
       });
-      sticker(S, { text: "<b>8</b> países · <b>4.368</b> M", x: 1180, y: 830, rot: -2.5, tail: "34%", at: 1.5 });
     },
     anim(tl, S) {
       tl.to(S.list, { opacity: 1, x: 0, duration: 0.4, stagger: 0.08 }, S.start + 0.5);
@@ -254,8 +230,6 @@ const MERIDIANO = [
       S.l2 = kin(S, "Es geografía.", { x: 0, y: 500, size: 104, color: b.accent, max: 1920, weight: 400 });
       S.l2.el.style.left = "0"; S.l2.el.style.width = "1920px";
       S.l2.el.style.justifyContent = "center";
-      mono(S, "MERIDIANO", { x: 0, y: 690, size: 14, at: 1.6 }).style.cssText +=
-        "left:0;width:1920px;text-align:center;letter-spacing:.5em";
     },
     anim(tl, S) {
       kinIn(tl, S.l1, S.start + 0.2, { stagger: 0.1 });
@@ -288,21 +262,18 @@ const CIFRA = [
     html(S) {
       const b = S.b;
       coin(S, { x: 1520, y: 420, r: 170, at: 0.1, symbol: "€" });
-      coin(S, { x: 1300, y: 740, r: 86, at: 0.35, symbol: "$" });
       brandLock(S, { x: PAD, y: 250, size: 104, tag: false });
       S.k = kin(S, "La economía, en un dato", { x: PAD, y: 640, size: 44, color: b.accent, weight: 500, max: 900 });
-      mono(S, "ECONOMÍA · 120 BPM · SIN HUMO", { x: PAD, y: 800, size: 14, at: 1.0 });
       const bars = h("div");
       Object.assign(bars.style, { position: "absolute", left: "96px", top: "860px", display: "flex", gap: "10px", alignItems: "flex-end" });
-      S.bars = Array.from({ length: 22 }, (_, i) => {
+      S.bars = Array.from({ length: 9 }, (_, i) => {
         const n = h("i");
-        n.style.cssText = `display:block;width:26px;height:${20 + (i * 37) % 90}px;border-radius:2px;background:var(--accent);opacity:.25`;
+        n.style.cssText = `display:block;width:38px;height:${60 + (i * 47) % 150}px;border-radius:3px;background:var(--accent);opacity:.42`;
         bars.appendChild(n);
         return n;
       });
       S.sec.appendChild(bars);
       S.tl.fromTo(S.bars, { scaleY: 0, transformOrigin: "50% 100%" }, { scaleY: 1, duration: 0.5, stagger: 0.02, ease: "power2.out" }, S.start + 0.5);
-      S.tl.to(S.bars, { scaleY: 0.4, duration: 1.2, stagger: { each: 0.04, yoyo: true, repeat: -1 }, ease: "sine.inOut" }, S.start + 1.1);
     },
     anim(tl, S) { kinIn(tl, S.k, S.start + 1.0, { stagger: 0.09 }); },
   },
@@ -331,17 +302,8 @@ const CIFRA = [
         font: "700 96px/1 var(--f-display)", letterSpacing: "-.03em", color: b.ink });
       S.sec.appendChild(yr);
       S.yr = yr;
-      S.row = ["China", "EE. UU.", "Japón", "Alemania", "India"].map((n, i) => {
-        const r = h("div");
-        Object.assign(r.style, { position: "absolute", right: "96px", top: (760 + i * 40) + "px",
-          font: "500 19px/1 var(--f-ui)", color: b.dim, opacity: 0 });
-        r.textContent = n;
-        S.sec.appendChild(r);
-        return r;
-      });
-      sticker(S, { text: "China <b>6.º → 2.º</b>", x: 1240, y: 300, rot: 2.5, tail: "22%", at: 1.3 });
     },
-    anim(tl, S) { tl.to(S.row, { opacity: 1, duration: 0.4, stagger: 0.08 }, S.start + 0.5); },
+    anim() {},
     render(t, sec, b) {
       const y = ranking(sec.querySelector("canvas"), t, {
         accent: hex(b.accent), accent2: hex(b.accent2), ink: hex(b.ink), dim: hex(b.dim),
@@ -360,14 +322,6 @@ const CIFRA = [
       S.sec.appendChild(rl);
       S.tl.fromTo(rl, { scaleX: 0, transformOrigin: "0% 50%" }, { scaleX: 1, duration: 0.8, ease: "power3.out" }, S.start + 0.9);
       globe(S, { x: 1500, y: 520, r: 260, at: 0.2, tint: b.accent });
-      S.arcs = [];
-      for (let i = 0; i < 3; i++) {
-        const l = h("div");
-        Object.assign(l.style, { position: "absolute", right: "96px", top: (190 + i * 120) + "px", width: "420px", height: "2px",
-          background: `linear-gradient(90deg, transparent, ${i === 1 ? b.accent2 : b.accent})`, opacity: ".7" });
-        S.sec.appendChild(l);
-        S.tl.fromTo(l, { scaleX: 0, transformOrigin: "100% 50%" }, { scaleX: 1, duration: 0.7, delay: i * 0.12, ease: "power3.out" }, S.start + 0.5);
-      }
     },
     anim(tl, S) {
       kinIn(tl, S.x, S.start + 0.15, { stagger: 0 });
@@ -383,7 +337,6 @@ const CIFRA = [
       S.h1 = kin(S, "Una gráfica.", { x: PAD, y: 340, size: 78, max: 900 });
       S.h2 = kin(S, "Una historia.", { x: PAD, y: 432, size: 78, color: b.accent, max: 900 });
       ctaCard(S, { x: PAD, y: 600, w: 600, at: 0.55, cursor: 1.3 });
-      ticker(S, 1000);
     },
     anim(tl, S) {
       kinIn(tl, S.h1, S.start + 0.3);
@@ -402,7 +355,6 @@ const UMBRAL = [
       turbine(S, { x: 1700, y: 610, s: 0.72, at: 0.25 });
       brandLock(S, { x: PAD, y: 240, size: 104, tag: false });
       S.k = kin(S, "La transición, en datos", { x: PAD, y: 640, size: 44, color: b.accent, max: 900 });
-      mono(S, "ENERGÍA · ESPAÑA · 2000–2024", { x: PAD, y: 800, size: 14, at: 1.0 });
       toggleSwitch(S, { x: 150, y: 860, at: 1.4, left: "CARBÓN", right: "RENOVABLE" });
     },
     anim(tl, S) { kinIn(tl, S.k, S.start + 1.0); },
@@ -421,8 +373,6 @@ const UMBRAL = [
       S.tl.fromTo(arrow, { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.45 }, S.start + 1.0);
       bigNum(S, { x: 740, y: 470, size: 250, to: 1, at: 1.1, suffix: "%", color: b.accent });
       mono(S, "2024", { x: 746, y: 750, size: 15, at: 1.25 });
-      gauge(S, { x: 1450, y: 470, r: 210, at: 0.6, to: 97, max: 100, label: "CAÍDA" });
-      chip(S, { x: 120, y: 860, text: "−35 puntos", sub: "en 24 años", at: 1.6 });
     },
     anim(tl, S) { kinIn(tl, S.h, S.start + 0.1); },
   },
@@ -447,7 +397,6 @@ const UMBRAL = [
       });
       S.sec.appendChild(leg);
       S.sec.__vals = [...leg.querySelectorAll(".val")];
-      sticker(S, { text: "carbón <b>36 % → 1 %</b>", x: 1180, y: 250, rot: 2.5, tail: "18%", at: 1.6 });
     },
     anim(tl, S) { tl.to(S.lrows, { opacity: 1, x: 0, duration: 0.4, stagger: 0.07 }, S.start + 0.5); },
     render(t, sec, b) {
@@ -471,7 +420,6 @@ const UMBRAL = [
   { // 4 · la frase
     html(S) {
       const b = S.b;
-      pylons(S, { at: 0, y: 640 });
       const shade = h("div");
       Object.assign(shade.style, { position: "absolute", inset: "0", background: "linear-gradient(180deg, rgba(242,239,232,.86), rgba(242,239,232,.35))" });
       S.sec.appendChild(shade);
@@ -511,7 +459,6 @@ const CENIT = [
       iris(S, { x: 1480, y: 470, r: 260, at: 0.05 });
       brandLock(S, { x: PAD, y: 260, size: 104, tag: false });
       S.k = kin(S, "El cielo, explicado", { x: PAD, y: 650, size: 44, color: b.accent, weight: 300, max: 900 });
-      mono(S, "ASTRONOMÍA · UNA IDEA POR SEMANA", { x: PAD, y: 800, size: 14, at: 1.0 });
     },
     anim(tl, S) { kinIn(tl, S.k, S.start + 1.0); },
   },
@@ -522,12 +469,10 @@ const CENIT = [
       cv.width = 1920; cv.height = 1080;
       S.sec.appendChild(cv);
       S.cv = cv;
-      comet(S, { at: 0.6, y: 220 });
       S.h = kin(S, "Esa estrella existe.", { x: PAD, y: 300, size: 86, max: 900, weight: 400 });
       chip(S, { x: PAD, y: 640, text: "HR 2491", sub: "a 300 años luz", at: 1.1 });
       mono(S, "CATÁLOGO YALE · 8.777 ESTRELLAS", { x: PAD, y: 1014, size: 13, at: 1.3 });
       S.tl.fromTo(cv, { opacity: 0 }, { opacity: 1, duration: 1.2 }, S.start);
-      sticker(S, { text: "<b>300</b> años luz", x: 1240, y: 700, rot: 3, tail: "16%", at: 1.6 });
     },
     anim(tl, S) { kinIn(tl, S.h, S.start + 0.3, { stagger: 0.1 }); markText(S.h, "existe", tl, S.start + 1.2); },
     render(t, sec, b) {
@@ -570,9 +515,6 @@ const CENIT = [
       mono(S, "SISTEMA SOLAR · ESCALA NO REAL", { x: PAD, y: 92, size: 14, at: 0.05 });
       bigNum(S, { x: 1420, y: 150, size: 168, to: 365, at: 0.4, dur: 1.4 });
       mono(S, "DÍAS", { x: 1424, y: 330, size: 14, at: 0.55 });
-      chip(S, { x: 1424, y: 380, text: "940 M km", sub: "por año", at: 1.2 });
-      sticker(S, { text: "1 año = <b>940 M km</b>", x: 1330, y: 820, rot: -2.5, tail: "20%", at: 1.5 });
-      constellation(S, { at: 0.8, x: 96, y: 740, scale: 0.8 });
     },
     anim(tl, S) {},
     render(t, sec, b) {
@@ -586,7 +528,7 @@ const CENIT = [
   { // 4 · la frase
     html(S) {
       const b = S.b;
-      constellation(S, { at: 0, x: 200, y: 120, scale: 1.5 });
+      constellation(S, { at: 0, x: 120, y: 70, scale: 1.15 });
       S.l1 = kin(S, "No es un decorado.", { x: 0, y: 400, size: 96, max: 1920, weight: 400 });
       S.l1.el.style.left = "0"; S.l1.el.style.width = "1920px"; S.l1.el.style.justifyContent = "center";
       S.l2 = kin(S, "Es un mecanismo.", { x: 0, y: 540, size: 96, color: b.accent, max: 1920, weight: 400 });
@@ -623,7 +565,6 @@ const APEX = [
       startLights(S, { x: 1180, y: 300, at: 0.05 });
       brandLock(S, { x: PAD, y: 480, size: 120, tag: false });
       S.k = kin(S, "La carrera, en datos", { x: PAD, y: 790, size: 46, color: b.accent, max: 900 });
-      mono(S, "FÓRMULA 1 · UNA CARRERA CADA SEMANA", { x: PAD, y: 900, size: 14, at: 2.0 });
       checker(S, { y: 1000, h: 44, at: 1.9 });
     },
     anim(tl, S) { kinIn(tl, S.k, S.start + 1.8); },
@@ -636,7 +577,6 @@ const APEX = [
         tyre(S, { x, y, r: 84, at: 0.9 + i * 0.22, label: ["S", "M", "S", "M"][i],
           color: i % 2 ? "var(--accent2)" : "var(--accent)" });
       });
-      mono(S, "4 RUEDAS · 20 PERSONAS", { x: 900, y: 690, size: 15, at: 1.9 });
       S.h = kin(S, "Cuatro ruedas, veinte personas, dos segundos.", { x: 140, y: 640, size: 42, color: b.dim, weight: 500, max: 700, line: 1.26 });
       chip(S, { x: 900, y: 780, text: "McLaren · Qatar 2023", sub: "RÉCORD", at: 2.1 });
     },
@@ -649,22 +589,17 @@ const APEX = [
       speedo(S, { x: 1680, y: 268, r: 132, at: 0.6, to: 372.6, max: 400 });
       bigNum(S, { x: 700, y: 830, size: 128, to: 372.6, dec: 1, at: 1.1, dur: 1.6, suffix: "km/h" });
       mono(S, "MONZA · 5,793 KM · 2005", { x: 704, y: 980, size: 13, at: 1.3 });
-      sectors(S, { x: 1290, y: 872, at: 1.5, w: 120 });
-      sticker(S, { text: "récord <b>20 años</b>", x: 1330, y: 700, rot: -3, tail: "40%", at: 2.4 });
     },
     anim() {},
   },
   { // 4 · la frase — bandera a cuadros y frenada
     html(S) {
       const b = S.b;
-      checker(S, { y: 168, h: 60, at: 0.05 });
       checker(S, { y: 852, h: 60, at: 0.15 });
       S.l1 = kin(S, "No va de velocidad.", { x: 0, y: 340, size: 92, max: 1920, weight: 700 });
       S.l1.el.style.left = "0"; S.l1.el.style.width = "1920px"; S.l1.el.style.justifyContent = "center";
       S.l2 = kin(S, "Va de precisión.", { x: 0, y: 470, size: 92, color: b.accent, max: 1920, weight: 700 });
       S.l2.el.style.left = "0"; S.l2.el.style.width = "1920px"; S.l2.el.style.justifyContent = "center";
-      mono(S, "APEX", { x: 0, y: 650, size: 14, at: 1.5 }).style.cssText +=
-        "left:0;width:1920px;text-align:center;letter-spacing:.6em";
     },
     anim(tl, S) {
       kinIn(tl, S.l1, S.start + 0.15, { stagger: 0.09, y: 110 });

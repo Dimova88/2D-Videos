@@ -226,7 +226,7 @@ function starfield(cv, t, drift, aMax, rgbOverride) {
 function solar(cv, t, opts) {
   const c = ctxOf(cv);
   const day = 365 * eio(clamp((t - 0.6) / 4.3));
-  const cx = 690, cy = 600;
+  const cx = 900, cy = 640;      // centrado en pantalla, no en el tercio izquierdo
   const planets = [
     ["Mercurio", 0.387, 88.0, opts.dim],
     ["Venus", 0.723, 224.7, opts.accent2],
@@ -235,7 +235,7 @@ function solar(cv, t, opts) {
     ["Júpiter", 5.203, 4333.0, [216, 176, 132]],
   ];
   planets.forEach(([name, au, per, col], i) => {
-    const r = 140 + (390 - 140) * (Math.log10(au / 0.387) / Math.log10(5.203 / 0.387));
+    const r = 170 + (520 - 170) * (Math.log10(au / 0.387) / Math.log10(5.203 / 0.387));
     const a = eout(prog(t, 0.4 + i * 0.12, 0.8));
     if (a <= 0) return;
     c.strokeStyle = rgba(opts.ink, 0.13 * a); c.lineWidth = 1;
@@ -244,17 +244,17 @@ function solar(cv, t, opts) {
     const ang = (2 * Math.PI * day) / per + i * 0.8;
     const px = cx + r * Math.cos(ang), py = cy + r * 0.42 * Math.sin(ang);
     c.fillStyle = rgba(col, 1);
-    c.beginPath(); c.arc(px, py, au === 1.0 ? 5.4 : 5, 0, 6.2832); c.fill();
+    c.beginPath(); c.arc(px, py, au === 1.0 ? 6.4 : 5.8, 0, 6.2832); c.fill();
 
     if (au === 1.0) {
       c.strokeStyle = rgba(col, 0.35 * a); c.lineWidth = 1;
-      c.beginPath(); c.arc(px, py, 14, 0, 6.2832); c.stroke();
+      c.beginPath(); c.arc(px, py, 18, 0, 6.2832); c.stroke();
       c.fillStyle = rgba(col, a);
       c.font = '400 15px "IBMPlexMono", monospace'; c.textAlign = "left"; c.textBaseline = "middle";
       c.fillText(name, px + 16, py - 6);
     }
   });
   c.fillStyle = rgba(opts.accent2, 0.95);
-  c.beginPath(); c.arc(cx, cy, 9, 0, 6.2832); c.fill();
+  c.beginPath(); c.arc(cx, cy, 11, 0, 6.2832); c.fill();
   return { day: Math.round(day), km: (day * 2.57e6) / 1e6 };
 }

@@ -200,14 +200,6 @@ body[data-brand="cenit"] .bg-layer {
 .camera { position: absolute; inset: 0; transform-origin: 50% 55%; will-change: transform; }
 
 /* barrido que tapa el corte: vive fuera de las escenas, encima de todas */
-.wipe { position: absolute; inset: -12% -30%; z-index: 90; pointer-events: none; opacity: 0; }
-.wipe i {
-  position: absolute; top: 0; bottom: 0; width: 15%;
-  transform: skewX(-16deg);
-}
-.wipe i:nth-child(1) { left: 0;   background: linear-gradient(90deg, transparent, var(--accent) 55%, transparent); opacity: .62; }
-.wipe i:nth-child(2) { left: 13%; background: linear-gradient(90deg, transparent, var(--accent2) 60%, transparent); opacity: .38; width: 9%; }
-.wipe i:nth-child(3) { left: 21%; background: linear-gradient(90deg, transparent, var(--ink) 60%, transparent); opacity: .12; width: 5%; }
 
 /* pegatina: tarjeta girada con borde de color y sombra dura */
 .sticker {

@@ -45,17 +45,20 @@ cualquier vídeo, se pasa entera.
 
 | # | Fallo | Comprobación | Estado |
 |---|---|---|---|
-| A1 | Efectos que se comen la voz | medir pico y RMS del WAV en los cues (`scripts` de este repo) | corregido: ganancias por tipo (0,34–0,60) y `loudnorm −14 LUFS` |
-| A2 | Efectos que suenan cuando no pasa nada en pantalla | cada cue sale de `src/cues.py`, que se alimenta de los mismos tiempos que animan la barra de pulso | regla |
-| A3 | Cue al principio del vídeo con cola larga (el *riser* del primer corte sonaba encima del arranque) | recorte de los efectos de más de 0,12 s si el cue cae antes del segundo 1 | corregido |
-| A4 | Un efecto con forma distinta al resto rompe la mezcla (`ValueError: shapes`) | ejecutar `src/sfx.py` entero, no solo una marca | corregido |
-| A5 | Audio muxeado a **96 kHz** (el `loudnorm` remuestrea a 192 k y el AAC se quedaba ahí) | `ffprobe -select_streams a:0` | corregido: `-ar 48000` en el muxeo |
-| A6 | Efectos **inaudibles** bajo la locución: quiencho y riser tenían el pico a 0,3 s y 0,8 s del cue, y los ticks caían en la banda de la voz | medir el pico de cada efecto en dBFS con `src/audiocheck.py` | corregido: efectos alineados por el pico, *tick* a 3,4 kHz, ganancias 1,2–1,7 y la música se aparta 20 ms/180 ms en cada cue |
+| A1 | Efectos que se comen la voz | medir pico y RMS del WAV en cada cue | **resuelto de raíz:** los efectos se han eliminado |
+| A2 | Efectos que suenan cuando no pasa nada en pantalla | comparar `cues.js` con lo que hace la imagen | sin efectos, no aplica |
+| A3 | Cue al principio del vídeo con cola larga (el *riser* del primer corte sonaba encima del arranque) | escuchar el primer segundo | sin efectos, no aplica |
+| A4 | Un efecto con forma distinta al resto rompe la mezcla (`ValueError: shapes`) | ejecutar el script entero, no solo una marca | sin efectos, no aplica |
+| A5 | Audio muxeado a **96 kHz** (`loudnorm` remuestrea a 192 k y el AAC se quedaba ahí) | `ffprobe -select_streams a:0` | corregido: `-ar 48000` en el muxeo |
+| A6 | Efectos **inaudibles** bajo la locución (pico a 0,3 y 0,8 s del cue, *ticks* en la banda de la voz) | medir el pico de cada efecto en dBFS | sin efectos, no aplica |
 | A7 | Sonoridad desigual entre piezas (−14,4 a −17,2 LUFS) por `loudnorm` a una pasada | `ffmpeg -af ebur128` | corregido: dos pasadas en `hyperframes/mux.sh` |
+| A8 | **El audio sonaba a presentación**: 16 efectos por pieza, bombo y charles en la cama, 120–132 BPM, subidas de tensión antes de cada corte | escuchar los 30 s seguidos, no fotogramas | corregido en v4: `src/sfx.py` borrado, cama nueva en `src/mix.py` (54–84 BPM, sin percusión, 12 dB bajo la voz, *ducking* suave) |
+| A9 | Música al mismo nivel que la voz en los tramos sin locución | comparar RMS de voz y cama | corregido: `BED_UNDER_VOICE` y *ducking* de 0,55 medidos en consola al construir |
 
 ## 5 · Comprobaciones antes de entregar (todas obligatorias)
 
-1. `python hyperframes/make_comps.py` y `python src/cues.py` sin cambios pendientes.
+1. `python hyperframes/make_comps.py`, `python src/mix.py` y
+   `python hyperframes/check_globals.py` sin errores.
 2. `hyperframes lint` sin errores; el render no imprime `sub_timeline_script_failure`.
 3. Render completo de las cinco piezas y **ffprobe**: 1920×1080, 30 fps, H.264 + AAC,
    duración entre 29,5 y 31,0 s.
@@ -63,10 +66,10 @@ cualquier vídeo, se pasa entera.
    los 5 fotogramas de cada pieza uno a uno, no solo el primero.
 5. `python tools/style_ref.py out/<marca>_hf.mp4`: 5 planos detectados y movimiento
    dentro de plano por encima de 0,03.
-6. Escuchar los 30 s de cada pieza (o al menos los 5 cues de cada plano) buscando
-   efectos fuera de sitio o voz tapada. Ayuda automática: `python src/audiocheck.py`
-   (comprueba 48 kHz, LUFS, pico, que cada uno de los 16 cues tenga su efecto por
-   encima de −26 dBFS y avisa si falta la locución).
+6. **Escuchar los 30 s enteros de cada pieza**, seguidos y con auriculares. No basta
+   con fotogramas: los dos fallos más caros de este proyecto (efectos a destiempo y
+   audio de presentación) solo se oyen. Ayuda automática: `python src/audiocheck.py`
+   (48 kHz, LUFS, pico, cama bajo la voz y aviso si falta locución).
 7. Comprobar que el texto en pantalla está en español, con tildes, y que ninguna
    cifra aparece sin su unidad.
 8. `git status` limpio de artefactos temporales (`build/` está ignorado) y commit con
@@ -137,3 +140,23 @@ entorno (sin `espeak`/`festival`/`pico`, sin salida a un servicio de TTS) y no s
 inventa una pista de voz; la pieza se entrega con música y efectos, y el texto en
 pantalla lleva el peso del relato. En cuanto exista `canales/audio/apex.mp3`, basta
 `python src/sfx.py apex && hyperframes/mux.sh apex` para tenerla completa.
+
+## 10 · v4 · lo que se cambió al verlo con ojos de espectador
+
+| # | Fallo | Cómo se detectó | Corregido |
+|---|---|---|---|
+| A8 | El audio sonaba a presentación: 16 efectos por pieza, bombo y charles en la cama, 120–132 BPM y un *riser* antes de cada corte | escuchar los 30 s seguidos | `src/sfx.py` y `src/cues.py` borrados; `src/mix.py` con cama de 54–84 BPM, sin percusión, 12 dB bajo la voz |
+| V22 | Planos sobrecargados: en un mismo encuadre convivían titular, objeto, dos cifras, sello, pegatina, anillo y marcas de agua | hoja de contactos de las cinco piezas, contando elementos por plano | 26 elementos eliminados (sellos, pegatinas, anillos, cintas, arcos, cajetines que repetían la cifra) |
+| V23 | Barrido de tres bandas en cada corte: transición de diapositiva | ver el vídeo entero, no fotogramas | eliminado; ahora se corta, con un respiro de 3 fotogramas en el color de fondo |
+| V24 | Destello de un fotograma en cada golpe (resto de los efectos) | fotograma a fotograma | eliminado con los efectos |
+| C9 | Al borrar el objeto `gauge()` seguía usándose desde `speedo()`: `ReferenceError: gauge is not defined` y el render de APEX se caía | el propio render lo dice, con fichero y línea | `gauge()` restaurado; `check_globals.py` no lo detecta porque no comprueba referencias, así que el chequeo obligatorio es **renderizar la pieza** |
+| C10 | Un `git reset --mixed` en la raíz dejó borrados 56 archivos de `out/` (Git los veía modificados, la carpeta no) | `ls canales/out` tras el reset | recuperados con `git checkout --`; regla: después de cualquier reset, `git status --short` y contar archivos |
+| V25 | Constelación de CENIT pisando el titular del plano-frase | fotograma del plano 4 | reducida a escala 1,15 y movida a la esquina |
+| V26 | Diafragma de CENIT con las aspas fuera del `viewBox`: el SVG las recortaba y se veían como triángulos partidos | fotograma del plano 1 a 0,9 s | aspas a 0,92·r |
+| V27 | Interruptor de UMBRAL: la bolita verde tapaba la palabra «CARBÓN» y el texto en `--dim` no se leía sobre el papel | recorte del plano 1 | etiquetas fuera de la pastilla y en tinta |
+| V28 | Sistema solar de CENIT dibujado en el tercio izquierdo, medio plano vacío | hoja de contactos, plano 3 | centrado en 900×640 y órbitas más grandes |
+| V29 | Nombres de país duplicados en el plano 3 de CIFRA (los del canvas y cinco etiquetas sueltas abajo a la derecha) | hoja de contactos | etiquetas sueltas eliminadas |
+
+**Regla de densidad (nueva).** Por plano: **un titular, un objeto protagonista y
+como mucho una etiqueta de dato**. Si al tapar un elemento el plano sigue
+entendiendo lo mismo, ese elemento no entra.

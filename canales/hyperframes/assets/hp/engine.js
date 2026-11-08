@@ -123,18 +123,6 @@ function cta(b) {
 /* ------------------------------------------------------------- motion pass v2 */
 /* Pegatina: tarjeta girada que cae sobre el dato. Aparece con rebote y luego
    flota 2-3 px para que nunca esté completamente quieta. */
-function sticker(S, { text, x, y, rot = -3, tail = "50%", notail = false, at = 1.0, width }) {
-  const n = h("div", "sticker" + (notail ? " notail" : ""), text);
-  n.style.left = x + "px";
-  n.style.top = y + "px";
-  n.style.setProperty("--tail-x", tail);
-  if (width) n.style.width = width + "px";
-  n.style.opacity = 0;
-  S.sec.appendChild(n);
-  S.stickers = S.stickers || [];
-  S.stickers.push({ el: n, rot, at });
-  return n;
-}
 
 /* Subrayado de marcador: barra dentro del span de la palabra. El span abre su
    propio contexto de apilado (z-index:0) y la barra va en z-index:-1: queda detrás
@@ -288,32 +276,17 @@ function build(key) {
   });
   tl.to(chapter, { opacity: 0, duration: 0.4 }, total - 0.5);
 
-  // barrido en cada corte interno: tapa el empalme en vez de fundir a negro
-  const wipe = h("div", "wipe", "<i></i><i></i><i></i>");
-  stage.appendChild(wipe);
-  T.cuts.forEach((cut, i) => {
-    const wide = i === 0 ? 0.40 : 0.28;        // el primer corte se toma su tiempo
-    tl.fromTo(wipe, { xPercent: -125, opacity: 1 },
-      { xPercent: 125, duration: wide, ease: "power2.inOut" }, cut - wide * 0.52);
-    tl.set(wipe, { opacity: 0 }, cut + wide * 0.52);
+  /* Sin transición: en un vídeo editado, entre plano y plano se corta. El barrido
+     de tres bandas de la v3 se leía como transición de diapositiva; el destello
+     de los cues se ha ido con los efectos de sonido. Queda solo un respiro de
+     3 fotogramas en el color de fondo para que el corte no sangre. */
+  const dip = h("div");
+  Object.assign(dip.style, { position: "absolute", inset: "0", zIndex: "90",
+    background: "var(--bg)", opacity: "0", pointerEvents: "none" });
+  stage.appendChild(dip);
+  T.cuts.forEach((cut) => {
+    tl.fromTo(dip, { opacity: 0.20 }, { opacity: 0, duration: 0.10, ease: "none" }, cut);
   });
-
-  /* Los cues son la partitura: los mismos tiempos generan los sonidos en Python
-     (src/sfx.py) y aquí, además del destello, se enciende una micro-marca en el
-     borde superior que dura 4 fotogramas. La primera versión dibujaba una barra
-     con una raya por cue y se leía como un defecto de codificación: fuera. */
-  const CUES = (window.HPD.cues || {})[key] || [];
-  if (CUES.length) {
-    const flash = h("div", "hitflash");
-    Object.assign(flash.style, { position: "absolute", inset: "0", zIndex: "87", opacity: "0",
-      background: "var(--ink)", pointerEvents: "none" });
-    stage.appendChild(flash);
-    CUES.forEach((c) => {
-      if (c.k === "hit" || c.k === "impact") {
-        tl.fromTo(flash, { opacity: 0.06 }, { opacity: 0, duration: 0.16, ease: "power2.out" }, c.t);
-      }
-    });
-  }
 
   // último plano: fundido a negro antes del final
   tl.to(stage.querySelectorAll(".scene")[SCENES[key].length - 1],

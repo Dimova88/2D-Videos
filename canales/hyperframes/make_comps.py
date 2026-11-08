@@ -2,7 +2,7 @@
 """Genera las cinco composiciones de HyperFrames desde una sola plantilla.
 
 Antes había cinco HTML copiados a mano; cada cambio de script (objetos, mundo,
-cues) había que repetirlo cinco veces y era fácil dejar una marca desincronizada.
+y colores) había que repetirlo cinco veces y era fácil dejar una marca desincronizada.
 Ahora el HTML se deriva de `assets/data/timings.js` y no puede divergir.
 """
 from __future__ import annotations
@@ -34,7 +34,6 @@ TPL = """<!doctype html>
   <script src="../assets/data/stars.js"></script>
   <script src="../assets/data/apex.js"></script>
   <script src="../assets/data/timings.js"></script>
-  <script src="../assets/data/cues.js"></script>
   <script src="../assets/hp/viz.js"></script>
   <script src="../assets/hp/marks.js"></script>
   <script src="../assets/hp/objects.js"></script>

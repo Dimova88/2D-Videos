@@ -189,8 +189,9 @@ vuelta. Wordmark en Space Grotesk con tracking cerrado.
 semáforo de salida de cinco luces que se encienden en secuencia y se apagan a la vez,
 cronómetro que corre hasta 1,80 s, cuatro neumáticos que caen sobre la mesa de boxes,
 trazado que se dibuja con un coche recorriéndolo, velocímetro hasta 372,6 km/h, tres
-sectores que se encienden y banderas a cuadros que barren el plano. Además, el único
-sonido de motor del proyecto (`src/sfx.py`, función `rev`).
+sectores que se encienden y banderas a cuadros que barren el plano. La música de
+APEX va a 84 BPM, la más rápida de las cinco, y sigue sin percusión: un motor de
+sonido de fondo convierte el vídeo en una demo.
 
 **Datos y fuentes** (`hyperframes/assets/data/apex.js`)
 

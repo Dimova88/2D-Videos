@@ -10,55 +10,55 @@
  "shot_mean_s": 4.29,
  "shot_median_s": 3.1,
  "cuts_per_min": 12.0,
- "motion_in_shot": 0.09,
+ "motion_in_shot": 0.0696,
  "frames": [
   {
    "t": 0.96,
-   "lum": 0.0706,
-   "contrast": 0.0425,
-   "sat": 0.469,
+   "lum": 0.0654,
+   "contrast": 0.0337,
+   "sat": 0.4082,
    "caption_mass": 0.0
   },
   {
    "t": 2.14,
-   "lum": 0.0701,
+   "lum": 0.07,
    "contrast": 0.0614,
-   "sat": 0.4512,
+   "sat": 0.4514,
    "caption_mass": 0.0
   },
   {
    "t": 6.34,
-   "lum": 0.0895,
-   "contrast": 0.1376,
-   "sat": 0.4456,
+   "lum": 0.0875,
+   "contrast": 0.1367,
+   "sat": 0.4483,
    "caption_mass": 0.0
   },
   {
    "t": 9.38,
-   "lum": 0.067,
+   "lum": 0.0669,
    "contrast": 0.0384,
-   "sat": 0.4525,
+   "sat": 0.4526,
    "caption_mass": 0.0
   },
   {
    "t": 15.94,
-   "lum": 0.0998,
-   "contrast": 0.1108,
-   "sat": 0.4448,
+   "lum": 0.098,
+   "contrast": 0.1097,
+   "sat": 0.4474,
    "caption_mass": 0.0
   },
   {
    "t": 21.96,
-   "lum": 0.0841,
-   "contrast": 0.0711,
-   "sat": 0.4136,
+   "lum": 0.0836,
+   "contrast": 0.0705,
+   "sat": 0.4149,
    "caption_mass": 0.0
   },
   {
    "t": 27.3,
-   "lum": 0.0742,
+   "lum": 0.0741,
    "contrast": 0.0593,
-   "sat": 0.4609,
+   "sat": 0.461,
    "caption_mass": 0.0
   }
  ],

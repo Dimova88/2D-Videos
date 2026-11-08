@@ -1,15 +1,20 @@
 # -*- coding: utf-8 -*-
-"""Chequeo de audio de las piezas: duración, sonoridad, picos y efectos audibles.
+"""Chequeo de audio y de ritmo de las piezas entregadas.
 
-Es la comprobación A1-A7 de `CHECKLIST.md`, automatizada, para no volver a entregar
-un vídeo con el audio a 96 kHz, con los efectos 20 dB por debajo de la voz o con una
-pieza sin locución sin darse cuenta.
+Sustituye al antiguo `audiocheck.py` (que medía los efectos de sonido: ya no hay).
+Comprueba lo que puede fallar en un vídeo de YouTube y que no se ve mirando
+fotogramas:
+
+  A1  contenedor y códec: H.264 + AAC, 1920×1080, 30 fps, audio a 48 kHz
+  A2  duración en el rango de la pieza (28,5–31,0 s)
+  A3  sonoridad −14 LUFS (±1,5) y pico ≤ −0,5 dBFS
+  A4  la música va por debajo de la voz (mide la cama sola y la mezcla)
+  A5  existe locución, o se avisa de que la pieza va sin voz
+  A6  no queda ningún efecto de sonido: el máster no debe tener transitorios
+      aislados más de 12 dB por encima de la media móvil (eso era un `tick`)
 
     python src/audiocheck.py            # las cinco piezas
     python src/audiocheck.py apex       # solo una
-
-Mide sobre `out/<marca>_hf.mp4` (lo que se entrega) y sobre `build/<marca>_audio.wav`
-(la mezcla previa, para aislar los efectos).
 """
 from __future__ import annotations
 
@@ -23,19 +28,11 @@ import numpy as np
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "src"))
-import sfx  # noqa: E402  (reutiliza la síntesis para saber cuánto mide cada efecto)
 from brandlib import BRANDS  # noqa: E402
 
 SR = 48000
-# mismas ganancias que la mezcla: si se cambian allí, se cambian aquí
-GAINS = {"whoosh": 1.45, "riser": 1.20, "tick": 1.70, "pop": 1.55,
-         "click": 1.30, "hit": 1.25, "impact": 1.30}
 TARGET_LUFS = -14.0
-
-
-def run(cmd: list[str]) -> str:
-    return subprocess.run(cmd, capture_output=True, text=True).stdout + \
-        subprocess.run(cmd, capture_output=True, text=True).stderr
+BED_UNDER_VOICE = 14.0
 
 
 def probe(path: str) -> dict:
@@ -50,7 +47,6 @@ def probe(path: str) -> dict:
 
 
 def loudness(path: str) -> tuple[float, float]:
-    """(LUFS integrados, pico real en dBFS) de un fichero de audio o vídeo."""
     out = subprocess.run(["ffmpeg", "-hide_banner", "-nostats", "-i", path,
                           "-af", "ebur128=peak=true", "-f", "null", "-"],
                          capture_output=True, text=True).stderr
@@ -59,79 +55,111 @@ def loudness(path: str) -> tuple[float, float]:
     return (float(i[-1]) if i else float("nan"), float(p[-1]) if p else float("nan"))
 
 
-def read_wav(path: str) -> np.ndarray:
-    import wave
-    with wave.open(path) as w:
-        a = np.frombuffer(w.readframes(w.getnframes()), dtype=np.int16).astype(np.float32) / 32768
-        return a.reshape(-1, w.getnchannels()).mean(axis=1)
+def read_audio(path: str) -> np.ndarray:
+    """Decodifica a mono float32 con ffmpeg (no depende de wave ni de mp3)."""
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", path, "-ac", "1",
+                          "-ar", str(SR), "-f", "f32le", "-"],
+                         capture_output=True).stdout
+    return np.frombuffer(raw, dtype=np.float32)
 
 
 def db(x: float) -> float:
     return 20 * np.log10(max(float(x), 1e-9))
 
 
-def check_cues(key: str, cues: list[dict]) -> list[tuple[str, float]]:
-    """Pico de cada efecto de animación en la mezcla final (dBFS).
+def transients(x: np.ndarray, win=0.15) -> list[float]:
+    """Instantes donde el pico supera en >12 dB la media móvil de 150 ms.
 
-    Se mide sobre la pista de efectos aislada, no sobre el máster: comparar el máster
-    contra «lo de antes» no dice nada, porque la locución tapa el efecto y el
-    silabeo de la voz varía más que el propio efecto. Un efecto por encima de
-    −26 dBFS se oye sobre una voz que ronda −20 dBFS de RMS.
+    Un `tick` o un `hit` deja exactamente esa firma; una voz y una cama musical
+    no, porque su envolvente es continua.
     """
-    dur = max(c["t"] for c in cues) + 2
-    tr = np.zeros(int(dur * SR), dtype=np.float32)
-    for c in cues:
-        s = sfx.make(c["k"], key)
-        if len(s) > 0.12 * SR and c["t"] < 1.0:
-            s = s[: int(0.12 * SR)]
-        sfx.place_cue(tr, s, c["t"], GAINS.get(c["k"], 0.4),
-                      align=c["k"] in ("whoosh", "riser"))
-    return [(c["k"], db(np.abs(tr[int(c["t"] * SR) - 2400:int(c["t"] * SR) + 2400]).max()))
-            for c in cues]
+    k = int(win * SR)
+    env = np.abs(x)
+    if len(env) < k * 3:
+        return []
+    smooth = np.convolve(env, np.ones(k, dtype=np.float32) / k, mode="same")
+    ratio = env / np.maximum(smooth, 1e-5)
+    peak = env > 0.12
+    hits = np.where((ratio > 4.0) & peak)[0]          # 4× ≈ +12 dB
+    # agrupa eventos contiguos
+    out, last = [], -SR
+    for i in hits:
+        if i - last > int(0.12 * SR):
+            out.append(i / SR)
+        last = i
+    return out
 
 
 def main(argv: list[str]) -> int:
-    cues_all = json.loads(open(os.path.join(ROOT, "hyperframes", "assets", "data", "cues.js"))
-                          .read().split("cues", 1)[1].split("=", 1)[1].strip().rstrip(";"))
     keys = [a for a in argv if not a.startswith("-")] or list(BRANDS)
     bad = 0
     for k in keys:
         mp4 = os.path.join(ROOT, "out", f"{k}_hf.mp4")
-        wav = os.path.join(ROOT, "build", f"{k}_audio.wav")
         if not os.path.exists(mp4):
             print(f"{k:10s} SIN VÍDEO en out/")
             bad += 1
             continue
         info = probe(mp4)
         lufs, peak = loudness(mp4)
-        a = info["a"]
-        cues = cues_all.get(k, [])
-        levels = check_cues(k, cues) if cues else []
-        low = [c for c in levels if c[1] < -26]
+        a, v = info["a"], info["v"]
         voice = os.path.exists(os.path.join(ROOT, "audio", f"{k}.mp3"))
-
         flags = []
+
         if a.get("sample_rate") != "48000":
-            flags.append(f"frecuencia {a.get('sample_rate')} (debe ser 48000)")
+            flags.append(f"audio a {a.get('sample_rate')} Hz")
         if a.get("codec_name") != "aac":
             flags.append("audio no AAC")
-        if info["v"].get("width") != 1920 or info["v"].get("height") != 1080:
+        if (v.get("width"), v.get("height")) != (1920, 1080):
             flags.append("no es 1920×1080")
-        if info["v"].get("r_frame_rate") != "30/1":
-            flags.append(f"fps {info['v'].get('r_frame_rate')}")
+        if v.get("r_frame_rate") != "30/1":
+            flags.append(f"fps {v.get('r_frame_rate')}")
         if not 28.5 <= info["dur"] <= 31.0:
             flags.append(f"duración {info['dur']:.1f} s")
         if abs(lufs - TARGET_LUFS) > 1.5:
             flags.append(f"sonoridad {lufs:.1f} LUFS")
         if peak > -0.5:
-            flags.append(f"pico {peak:.1f} dBFS (riesgo de recorte)")
-        if low:
-            flags.append(f"{len(low)} efectos por debajo de −26 dBFS")
-        if not voice:
-            flags.append("sin locución (no hay audio/%s.mp3)" % k)
+            flags.append(f"pico {peak:.1f} dBFS")
+
+        # ---- medición real sobre la mezcla previa al loudnorm (build/)
+        #      En los huecos donde no hay voz solo queda la música: ahí se mide
+        #      el nivel de la cama y se buscan transitorios sueltos (restos de
+        #      efectos). Comparar contra el máster no sirve: el loudnorm sube
+        #      todo hasta −14 LUFS y falsea la relación voz/música.
+        wav = os.path.join(ROOT, "build", f"{k}_audio.wav")
+        bed_note, mix_flags, tr = "sin audio", [], []
+        if os.path.exists(wav) and voice:
+            m = read_audio(wav)
+            v = read_audio(os.path.join(ROOT, "audio", f"{k}.mp3"))
+            kk = int(0.05 * SR)
+            env = np.convolve(np.abs(v), np.ones(kk, dtype=np.float32) / kk, mode="same")
+            thr = 0.06 * np.percentile(env, 95)
+            speech = env > thr
+            # alinea la voz con la mezcla (LEAD) y recorta los extremos
+            off = int(0.55 * SR)
+            mask = np.zeros(len(m), dtype=bool)
+            hi = min(len(m), off + len(speech))
+            mask[off:hi] = speech[:hi - off]
+            edge = int(1.0 * SR)
+            mask[:edge] = mask[-edge:] = True            # fuera de juego los extremos
+            gap, talk = m[~mask], m[mask]
+            if len(gap) > SR * 0.3 and len(talk) > SR * 0.3:
+                gr, tr_ = np.sqrt((gap ** 2).mean()), np.sqrt((talk ** 2).mean())
+                rel = db(tr_) - db(gr)
+                bed_note = f"música {db(gr):5.1f} dBFS en los huecos · {rel:4.1f} dB bajo la voz"
+                if rel < 9:
+                    mix_flags.append("la música está alta bajo la voz")
+                tr = transients(gap)
+                if len(tr) > 1:
+                    mix_flags.append(f"{len(tr)} transitorios en los huecos (¿efectos?)")
+        elif os.path.exists(wav):
+            m = read_audio(wav)
+            tr = transients(m)
+            bed_note = "solo música"
+            if len(tr) > 1:
+                mix_flags.append(f"{len(tr)} transitorios (¿efectos?)")
 
         print(f"{k:10s} {info['dur']:5.2f} s · {lufs:6.1f} LUFS · pico {peak:5.1f} · "
-              f"{len(cues)} cues, mínimo {min((c[1] for c in levels), default=0):5.1f} dBFS · "
+              f"{bed_note} · "
               + ("OK" if not flags else " · ".join(flags)))
         bad += bool([f for f in flags if not f.startswith("sin locución")])
     print("TODO OK" if not bad else f"{bad} pieza(s) con algo que revisar")

@@ -3,12 +3,17 @@
 Cinco canales candidatos, cinco marcas personales completas y un vídeo de 30 s por
 marca. Mismo motor, cinco identidades visuales que no se parecen en nada.
 
-> **v3 (esta entrega).** Los cinco vídeos se han rehecho para que no parezcan
-> diapositivas: capa de mundo que se mueve durante toda la pieza, objetos de nicho en
-> lugar de solo gráficos (globo, monedas, aerogeneradores, diafragma, semáforo,
-> neumáticos, cronómetro), tipografía cinética y **efectos de sonido sintetizados**
-> sincronizados con cada animación. Nueva marca: **APEX · Fórmula 1**.
-> Lista de fallos revisados: **`CHECKLIST.md`**.
+> **v4 (esta entrega).** Tres cambios sobre la v3, todos por la misma razón —
+> parecía una presentación:
+> 1. **Sin efectos de sonido.** Fuera los 16 efectos por pieza. Queda locución más
+>    una cama musical lenta, sin percusión, 12 dB por debajo de la voz (`src/mix.py`).
+> 2. **Planos descargados.** Una idea por plano: titular, un objeto del nicho y como
+>    mucho una etiqueta. Se han eliminado sellos, pegatinas, anillos, cintas, arcos
+>    decorativos y todo lo que repetía una cifra que ya estaba en pantalla.
+> 3. **Cortes limpios.** Fuera el barrido de tres bandas entre planos: se corta.
+>
+> Para el formato de 8 minutos (el que de verdad retiene) hay un plan por nicho en
+> **`LARGO.md`**. Lista de fallos revisados: **`CHECKLIST.md`**.
 
 ## Entregables
 
@@ -21,10 +26,10 @@ marca. Mismo motor, cinco identidades visuales que no se parecen en nada.
 
 **Dos motores, dos generaciones.** `_30s.mp4` = Python + Pillow (tareas 1–6, se
 conservan como referencia). `_hf.mp4` = HTML + GSAP con HyperFrames, la versión viva:
-mundo animado, objetos de nicho, tipografía cinética y efectos de sonido
+objetos de nicho, tipografía cinética y audio de YouTube
 (ver `hyperframes/README.md` y `hyperframes/ESTILO.md`).
 
-| Canal | Python (v1) | HyperFrames (v3, con efectos) |
+| Canal | Python (v1) | HyperFrames (v4) |
 |---|---|---|
 | MERIDIANO | `out/meridiano_30s.mp4` | `out/meridiano_hf.mp4` · `out/hf_meridiano.png` |
 | CIFRA | `out/cifra_30s.mp4` | `out/cifra_hf.mp4` · `out/hf_cifra.png` |
@@ -46,16 +51,19 @@ Lista de fallos que ya han aparecido y comprobaciones antes de entregar: **`CHEC
 
 | Pieza | Duración | Cortes/min | Plano mediano | Movimiento en plano |
 |---|---|---|---|---|
-| MERIDIANO | 30,0 s | 12,0 | 3,1 s | 0,090 |
-| CIFRA | 29,7 s | 10,1 | 4,95 s | 0,105 |
-| UMBRAL | 30,7 s | 9,8 | 4,65 s | 0,077 |
-| CENIT | 29,7 s | 12,1 | 2,7 s | 0,062 |
-| APEX | 30,0 s | 12,0 | 1,9 s | 0,092 |
+| MERIDIANO | 30,0 s | 12,0 | 3,1 s | 0,070 |
+| CIFRA | 29,7 s | 12,1 | 4,7 s | 0,059 |
+| UMBRAL | 30,7 s | 7,8 | 6,8 s | 0,057 |
+| CENIT | 29,7 s | 16,2 | 1,6 s | 0,036 |
+| APEX | 30,0 s | 14,0 | 2,1 s | 0,057 |
 
-Audio medido con `python src/audiocheck.py`: 48 kHz, AAC, −14,2 a −15,4 LUFS, pico
-≤ −0,7 dBFS, y los 16 efectos de animación de cada pieza por encima de −26 dBFS.
-El chef de la mezcla (voz + música + efectos) es `src/sfx.py`; el volcado final, con
-`loudnorm` en dos pasadas, `hyperframes/mux.sh`.
+En la v4 el movimiento baja a propósito respecto a la v3 (0,036–0,070 frente a
+0,062–0,105): menos capas moviéndose a la vez es lo que hace que el plano no se lea
+como un salvapantallas. Sigue muy por encima de la v1 (0,014–0,031).
+
+Audio: 48 kHz, AAC, −14,2 a −15,4 LUFS, pico ≤ −0,7 dBFS (`hyperframes/mux.sh`,
+`loudnorm` en dos pasadas). La mezcla —voz + cama musical, sin efectos— la hace
+`src/mix.py`; `python src/audiocheck.py` comprueba el resultado de las cinco piezas.
 
 Motion pass v2 — cómo se copió el lenguaje visual de un vídeo de referencia con
 Agent Reach, la skill `watch` y yt-dlp, y qué no se pudo hacer: **`hyperframes/ESTILO.md`**.
@@ -103,15 +111,28 @@ python src/build.py                    # los cuatro canales
 python src/build.py umbral cenit       # solo dos
 python src/audit.py                    # tabla de empaquetado de las 4 piezas
 python src/sheets.py                   # hojas de contactos
-python src/cues.py                     # cues de imagen + audio
-python src/sfx.py                      # voz + música + efectos -> build/*_audio.wav
+python src/mix.py                      # voz + cama musical -> build/*_audio.wav
+python src/mix.py --bed 480 meridiano  # solo la cama, para el formato largo
 cd hyperframes && npm install
 python make_comps.py                   # los cinco HTML, desde timings.js
 ./render.sh                            # las cinco piezas, en HTML + GSAP
 python tools/style_ref.py out/cenit_hf.mp4     # mide el ritmo del resultado
 ```
 
-Cada vídeo tarda unos 3–4 minutos (900 fotogramas a 1080p con supersampling 2×).
+Cada pieza tarda unos 2,5–4 minutos de render (900 fotogramas a 1080p). El MP4 final
+con el audio se hace con `PATH=/tmp/bin:$PATH hyperframes/mux.sh <marca>`, que aplica
+`loudnorm` en dos pasadas a 48 kHz.
+
+Para comprobar lo entregado sin mirar fotogramas:
+
+```bash
+python src/audiocheck.py               # 1920×1080/30 fps, 48 kHz, −14 LUFS, voz sobre música
+python hyperframes/check_globals.py    # los seis scripts comparten ámbito: sin colisiones
+python tools/style_ref.py out/meridiano_hf.mp4
+```
+
+Si no hay Chrome en el sistema (pasa en este entorno), `hyperframes` usa
+`@sparticuz/chromium`; el detalle está en `hyperframes/README.md`.
 
 ## Estructura
 
@@ -119,7 +140,9 @@ Cada vídeo tarda unos 3–4 minutos (900 fotogramas a 1080p con supersampling 2
 src/brandlib.py   motor de dibujo + las 4 marcas como datos (paleta, fuentes, easing, música)
 src/marks.py      los 4 logotipos, dibujados con primitivas (nada de SVG ni imágenes)
 src/shots.py      20 planos (5 por canal) que solo usan tokens de la marca
-src/build.py      voz + música -> mp4, con detección de silencios para los cortes
+src/build.py      motor Pillow de las piezas v1 (se conserva como referencia)
+src/mix.py        audio de las cinco piezas: locución + cama musical, sin efectos
+src/audiocheck.py comprueba lo entregado: códec, LUFS, pico y relación voz/música
 src/audit.py      auditoría medible: legibilidad, contraste, movimiento, ritmo -> out/auditoria.png
 src/sheets.py     hojas de contactos de los fotogramas reales de cada MP4
 audio/            las 4 locuciones (voz en off en español)
