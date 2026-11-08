@@ -59,12 +59,13 @@ BED_BPM = {"meridiano": 64, "cifra": 72, "umbral": 66, "cenit": 54, "apex": 84}
 # Cuánto por debajo de la voz va la música, en dB. −15 es el punto en el que se
 # oye sin que haya que subir el volumen para entender la locución.
 BED_UNDER_VOICE = 12.0
+OCTAVE = {"apex": 1.5}
 LEVEL = {
-    "meridiano": {"pad": .050, "bass": .034, "key": .026, "air": .004},
-    "cifra":     {"pad": .042, "bass": .030, "key": .030, "air": .005},
-    "umbral":    {"pad": .052, "bass": .032, "key": .022, "air": .005},
-    "cenit":     {"pad": .058, "bass": .026, "key": .018, "air": .006},
-    "apex":      {"pad": .044, "bass": .038, "key": .020, "air": .004},
+    "meridiano": {"pad": .054, "bass": .026, "key": .026, "air": .004},
+    "cifra":     {"pad": .046, "bass": .022, "key": .030, "air": .004},
+    "umbral":    {"pad": .056, "bass": .024, "key": .022, "air": .004},
+    "cenit":     {"pad": .060, "bass": .020, "key": .018, "air": .005},
+    "apex":      {"pad": .048, "bass": .022, "key": .020, "air": .004},
 }
 
 
@@ -137,6 +138,10 @@ def bed(dur, chord, bpm, key):
     beat = 60.0 / bpm
     bar = beat * 4
     prog = PROG[key]
+    # El acorde de APEX (110/138,59/164,81 Hz) está entero por debajo de 200 Hz:
+    # medido, el 80 % de la energía caía ahí y en un portátil eso no se oye, solo
+    # embarran la mezcla. Se sube una octava para la cama.
+    chord = [f * OCTAVE.get(key, 1.0) for f in chord]
 
     # Secciones: cada ~50 s la cama cambia de densidad (lleno / solo colchón).
     # Con cuatro acordes y 54-84 BPM, ocho minutos sin cambios se notan como un
@@ -151,13 +156,16 @@ def bed(dur, chord, bpm, key):
         sh = prog[i % len(prog)]
         fr = [f * _semi(sh) for f in chord]
         seg = min(bar * 1.45, dur - start)
-        p = _pad([fr[0] / 2] + fr, seg, atk=min(1.3, seg * 0.4), rel=min(1.5, seg * 0.45))
+        p = _pad(fr, seg, atk=min(1.3, seg * 0.4), rel=min(1.5, seg * 0.45))
         _add(out, p * L["pad"] * (0.75 + 0.35 * density(start)), start)
 
     # 2 · bajo: una nota por compás, con la fundamental del acorde
     for i, start in enumerate(np.arange(0, dur, bar / 2)):
         sh = prog[(i // 2) % len(prog)]
-        f = chord[0] * _semi(sh) / 2
+        # el bajo en la fundamental del acorde, no una octava por debajo: a 55 Hz
+        # (APEX, con el acorde en 110) el 80 % de la energía se iba a graves que en
+        # un altavoz de portátil ni se oyen y solo embarran la mezcla.
+        f = chord[0] * _semi(sh)
         b = _bass(f, min(bar, dur - start)) * L["bass"]
         _add(out, b, start)
 
@@ -184,9 +192,12 @@ def bed(dur, chord, bpm, key):
     if L["air"] > 0:
         rng = np.random.default_rng(3)
         air = rng.normal(0, 1, n).astype(np.float32)
-        out += B.lp(B.hp(air, 300), 1600) * L["air"]
+        # aire por encima de 1 kHz: sin esto la cama queda mate (centroide ~500 Hz
+        # y 0 % de energía por encima de 2 kHz), que en YouTube se oye como
+        # «audio apagado» aunque sea música correcta.
+        out += B.lp(B.hp(air, 1400), 6200) * L["air"] * 2.0
 
-    out = B.lp(out, 5200 if key != "cifra" else 6800)
+    out = B.lp(out, 7000 if key != "cifra" else 8200)
     out = _reverb(out, decay=1.2 if key in ("cenit", "meridiano") else 1.0,
                   wet=0.30 if key == "cenit" else 0.24)
     env = np.clip(t / 1.4, 0, 1) ** 1.4                   # entra despacio

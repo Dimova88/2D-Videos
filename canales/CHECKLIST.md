@@ -111,35 +111,46 @@ cualquier vídeo, se pasa entera.
 exacto en el que ocurre, no del final del plano. Casi todos los fallos de esta lista
 se vieron así.
 
-## 9 · Estado de la entrega (medido, 2026-10-25)
+## 9 · Estado de la entrega (medido, 2026-10-25, v4)
 
 `python src/audiocheck.py` → las cinco piezas:
 
 ```
-meridiano  30.03 s ·  -14.4 LUFS · pico  -0.9 · 16 cues, mínimo  -8.9 dBFS · OK
-cifra      29.70 s ·  -14.4 LUFS · pico  -0.9 · 16 cues, mínimo  -8.9 dBFS · OK
-umbral     30.70 s ·  -14.2 LUFS · pico  -1.0 · 16 cues, mínimo  -8.9 dBFS · OK
-apex       30.00 s ·  -15.4 LUFS · pico  -0.9 · 16 cues, mínimo  -8.9 dBFS · sin locución
-cenit      29.70 s ·  -14.6 LUFS · pico  -0.7 · 16 cues, mínimo  -8.9 dBFS · OK
+meridiano  30.03 s · -14.2 LUFS · pico -1.4 · música -30.3 dBFS en los huecos · 13.7 dB bajo la voz · OK
+cifra      29.70 s · -14.1 LUFS · pico -1.3 · música -28.7 dBFS en los huecos · 14.3 dB bajo la voz · OK
+umbral     30.70 s · -14.1 LUFS · pico -1.4 · música -28.7 dBFS en los huecos · 14.2 dB bajo la voz · OK
+cenit      29.70 s · -14.2 LUFS · pico -1.3 · música -31.3 dBFS en los huecos · 14.0 dB bajo la voz · OK
+apex       30.00 s · -13.9 LUFS · pico -2.8 · solo música                                           · OK
 ```
 
 `python tools/style_ref.py` sobre los MP4 finales:
 
 | Pieza | Planos | Plano mediano | Cortes/min | Movimiento en plano |
 |---|---|---|---|---|
-| MERIDIANO | 7 | 3,1 s | 12,0 | 0,090 |
-| CIFRA | 6 | 4,95 s | 10,1 | 0,105 |
-| UMBRAL | 6 | 4,65 s | 9,8 | 0,077 |
-| CENIT | 7 | 2,7 s | 12,1 | 0,062 |
-| APEX | 7 | 1,9 s | 12,0 | 0,092 |
+| MERIDIANO | 7 | 3,1 s | 12,0 | 0,070 |
+| CIFRA | 7 | 4,7 s | 12,1 | 0,059 |
+| UMBRAL | 5 | 6,8 s | 7,8 | 0,057 |
+| CENIT | 9 | 1,6 s | 16,2 | 0,036 |
+| APEX | 8 | 2,1 s | 14,0 | 0,057 |
 
-`python hyperframes/check_globals.py` → 80 nombres globales, 0 colisiones.
+`python hyperframes/check_globals.py` → 74 nombres globales, 0 colisiones.
+
+Equilibrio espectral de la cama (`src/mix.py`, medido con FFT sobre los 30 s):
+graves 27–46 %, medios 53–72 %, agudos 0,7–1,7 %, cresta de envolvente 4–6 dB
+(sin transitorios: no hay percusión). Antes de la v4 el bombo y los charles
+dejaban picos de 12 dB cada negra.
 
 **Lo que no está resuelto:** APEX no tiene locución. No hay motor de voz en este
 entorno (sin `espeak`/`festival`/`pico`, sin salida a un servicio de TTS) y no se
-inventa una pista de voz; la pieza se entrega con música y efectos, y el texto en
-pantalla lleva el peso del relato. En cuanto exista `canales/audio/apex.mp3`, basta
-`python src/sfx.py apex && hyperframes/mux.sh apex` para tenerla completa.
+inventa una pista de voz; la pieza se entrega con música, y el texto en pantalla
+lleva el peso del relato. En cuanto exista `canales/audio/apex.mp3`, basta
+`python src/mix.py apex && hyperframes/mux.sh apex` para tenerla completa.
+
+**Y lo que no se puede entregar todavía:** el vídeo de 8 minutos. Las piezas de
+30 s son el tráiler del canal; el capítulo largo necesita guion por capítulo
+(~1.200 palabras con fuente por afirmación) y locución, y aquí no hay TTS. El plan
+está en `LARGO.md`; el resto del pipeline (cama musical a cualquier duración,
+motor de planos, medición de ritmo) ya está listo para ese formato.
 
 ## 10 · v4 · lo que se cambió al verlo con ojos de espectador
 

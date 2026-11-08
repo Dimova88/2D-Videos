@@ -10,6 +10,8 @@ objetivos de diseño, no medidas de YouTube: no hay analítica conectada.
 | Dato | Valor | Cómo se midió |
 |---|---|---|
 | Duración de la cama musical | 480 s sin deriva (RMS −18,7 ± 0,3 dB por minuto) | `python src/mix.py --bed 480 <marca>` |
+| Equilibrio espectral de la cama | graves 27–46 %, medios 53–72 %, agudos 0,7–1,7 % | FFT sobre 30 s |
+| Cresta de envolvente de la cama | 4–6 dB (sin percusión; con bombo eran 12 dB cada negra) | envolvente de 50 ms |
 | Coste de render | ≈ 5× tiempo real (30 s → 2,5 min; 8 min → ≈ 40 min por pieza) | los renders de este repo |
 | Movimiento dentro de plano | 0,062–0,105 | `tools/style_ref.py` |
 | Cortes por minuto | 9,8–12,1 | `tools/style_ref.py` |
